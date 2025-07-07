@@ -1,0 +1,12 @@
+:verbose: false
+:concurrency: 5
+:timeout: 25
+:retry: 3
+
+:queues:
+  - ultra_premium
+  - default
+  - mailers
+
+production:
+  :concurrency: 10
