@@ -69,27 +69,10 @@ Rails.application.configure do
 
   # Use a real queuing backend for Active Job (and separate queues per environment).
   # config.active_job.queue_adapter = :resque
-  # config.active_job.queue_name_prefix = "staffcraft_rails_production"
+  # config.active_job.queue_name_prefix = "staffcraft_r_production"
 
   config.action_mailer.perform_caching = false
 
-  # Email configuration
-  config.action_mailer.delivery_method = :smtp
-  config.action_mailer.perform_deliveries = true
-  config.action_mailer.smtp_settings = {
-    address: ENV['SMTP_ADDRESS'],
-    port: ENV['SMTP_PORT'],
-    domain: ENV['SMTP_DOMAIN'],
-    user_name: ENV['SMTP_USERNAME'],
-    password: ENV['SMTP_PASSWORD'],
-    authentication: 'plain',
-    enable_starttls_auto: true
-  }
-
-  config.action_mailer.default_url_options = {
-    host: ENV['APP_HOST'],
-    protocol: 'https'
-  }
   # Ignore bad email addresses and do not raise email delivery errors.
   # Set this to true and configure the email server for immediate delivery to raise delivery errors.
   # config.action_mailer.raise_delivery_errors = false
@@ -111,13 +94,4 @@ Rails.application.configure do
   # ]
   # Skip DNS rebinding protection for the default health check endpoint.
   # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
-  config.cache_store = :redis_cache_store, {
-    url: ENV['REDIS_URL'],
-    namespace: 'staffcraft_cache',
-    expires_in: 1.hour,
-    race_condition_ttl: 10.seconds,
-    compress: true,
-    compression_threshold: 1.kilobyte
-  }
-
 end

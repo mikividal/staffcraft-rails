@@ -1,25 +1,17 @@
+
 default: &default
-  adapter: postgresql
-  encoding: unicode
+  adapter: sqlite3
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
   timeout: 5000
 
 development:
   <<: *default
-  database: staffcraft_rails_development
-  username: <%= ENV['USER'] %>  # Usa tu usuario de Mac automáticamente
-  password:
-  host: localhost
+  database: db/development.sqlite3
 
 test:
   <<: *default
-  database: staffcraft_rails_test
-  username: <%= ENV['USER'] %>
-  password:
-  host: localhost
+  database: db/test.sqlite3
 
 production:
   <<: *default
-  database: staffcraft_rails_production
-  username: staffcraft_rails
-  password: <%= ENV["STAFFCRAFT_RAILS_DATABASE_PASSWORD"] %>
+  database: db/production.sqlite3
