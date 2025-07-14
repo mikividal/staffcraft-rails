@@ -1,0 +1,52 @@
+<% content_for :head do %>
+  <title>Analysis Results #<%= @analysis.id %> - StaffCraft</title>
+  <meta name="robots" content="noindex, nofollow">
+<% end %>
+
+<% content_for :body_end do %>
+  <% if @analysis.pending? || @analysis.processing? || @analysis.validating? %>
+    <script>
+      setTimeout(function() {
+        window.location.reload();
+      }, 3000);
+    </script>
+  <% end %>
+<% end %>
+
+<div class="col-12 col-lg-10">
+  <h1 class="text-center mb-4 text-gradient">
+    <%= @analysis.completed? ? "🎯 Your Analysis Results" : "🔄 Analyzing Your Options..." %>
+  </h1>
+
+  <% if @analysis.failed? %>
+    <div class="alert alert-gradient alert-danger">
+      <strong>Analysis Failed:</strong> <%= @analysis.error_message %>
+    </div>
+  <% elsif @analysis.pending? || @analysis.processing? || @analysis.validating? %>
+    <div class="progress-container">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <h3>Analyzing across 150+ data sources...</h3>
+      <div class="progress">
+        <div class="progress-bar"
+             role="progressbar"
+             style="width: <%= @analysis.progress_percentage %>%"
+             aria-valuenow="<%= @analysis.progress_percentage %>"
+             aria-valuemin="0"
+             aria-valuemax="100">
+          <%= @analysis.progress_percentage %>%
+        </div>
+      </div>
+      <p class="status-text">
+        <% if @analysis.validating? %>
+          🔍 Critic agent validating reasoning chains...
+        <% else %>
+          <%= @analysis.agents_completed %> of 7 agents completed
+        <% end %>
+      </p>
+    </div>
+  <% else %>
+    <%= render 'results_display', analysis: @analysis %>
+  <% end %>
+</div>

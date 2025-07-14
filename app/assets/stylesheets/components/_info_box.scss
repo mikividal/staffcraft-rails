@@ -1,0 +1,21 @@
+.info-box {
+  background: linear-gradient(135deg, #e0e7ff 0%, #f0e7ff 100%);
+  border: 1px solid #c7d2fe;
+  border-radius: var(--border-radius);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+
+  strong {
+    color: #5b21b6;
+  }
+
+  ul {
+    margin-top: 0.5rem;
+    margin-bottom: 0;
+    padding-left: 1.5rem;
+
+    li {
+      margin-bottom: 0.25rem;
+    }
+  }
+}

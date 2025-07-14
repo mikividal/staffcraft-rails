@@ -1,16 +1,35 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>StaffcraftR</title>
+    <title>StaffCraft - Hiring vs Automation Analysis</title>
+    <meta name="description" content="Get data-driven recommendations comparing hiring, automation, and outsourcing with transparent AI reasoning">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
+
+    <!-- Open Graph / Social Media -->
+    <meta property="og:title" content="StaffCraft - Should I Hire or Automate?">
+    <meta property="og:description" content="AI-powered analysis to help you choose between hiring, automation, or outsourcing">
+    <meta property="og:type" content="website">
+
+    <!-- Additional head content from individual pages -->
+    <%= yield(:head) if content_for?(:head) %>
   </head>
 
   <body>
-    <%= yield %>
+    <div class="container-fluid analysis-page">
+      <div class="row justify-content-center">
+        <div class="col-12 col-md-10 col-lg-8">
+          <!-- Page-specific content -->
+          <%= yield %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Additional body content from individual pages -->
+    <%= yield(:body_end) if content_for?(:body_end) %>
   </body>
 </html>

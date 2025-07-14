@@ -1,0 +1,21 @@
+.alert-gradient {
+  border: none;
+  border-radius: var(--border-radius);
+  padding: 1rem 1.5rem;
+  font-weight: 500;
+
+  &.alert-success {
+    background: var(--success-gradient);
+    color: white;
+  }
+
+  &.alert-warning {
+    background: var(--warning-gradient);
+    color: white;
+  }
+
+  &.alert-danger {
+    background: var(--danger-gradient);
+    color: white;
+  }
+}

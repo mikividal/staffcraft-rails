@@ -1,0 +1,180 @@
+.synthesis-container {
+  background: white;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-lg);
+  padding: 2.5rem;
+  margin-bottom: 2rem;
+
+  .executive-summary {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0e7ff 100%);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    margin-bottom: 2rem;
+
+    h2 {
+      color: #1e40af;
+      margin-bottom: 1.5rem;
+    }
+
+    .key-insights {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+
+      .insight-card {
+        background: white;
+        padding: 1rem;
+        border-radius: calc(var(--border-radius) / 2);
+        text-align: center;
+        box-shadow: var(--shadow-sm);
+
+        .insight-number {
+          font-size: 2rem;
+          font-weight: 700;
+          color: #1e40af;
+        }
+
+        .insight-label {
+          font-size: 0.875rem;
+          color: #64748b;
+          margin-top: 0.25rem;
+        }
+      }
+    }
+  }
+
+  .recommendation-primary {
+    background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);
+    border: 2px solid #f59e0b;
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    margin: 2rem 0;
+    position: relative;
+
+    &:before {
+      content: "🏆 TOP RECOMMENDATION";
+      position: absolute;
+      top: -12px;
+      left: 2rem;
+      background: #f59e0b;
+      color: white;
+      padding: 0.25rem 1rem;
+      border-radius: 15px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+
+    h3 {
+      color: #92400e;
+      margin-bottom: 1rem;
+      margin-top: 0.5rem;
+    }
+
+    .recommendation-scores {
+      display: flex;
+      justify-content: space-around;
+      margin: 1.5rem 0;
+      padding: 1rem;
+      background: white;
+      border-radius: calc(var(--border-radius) / 2);
+
+      .score-item {
+        text-align: center;
+
+        .score-label {
+          font-size: 0.75rem;
+          color: #92400e;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+        }
+
+        .score-value {
+          font-size: 1.5rem;
+          font-weight: 700;
+          color: #f59e0b;
+        }
+      }
+    }
+  }
+
+  .implementation-timeline {
+    background: #f8fafc;
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    margin-top: 2rem;
+
+    h4 {
+      color: #1e293b;
+      margin-bottom: 1.5rem;
+    }
+
+    .timeline-item {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 1.5rem;
+      position: relative;
+      padding-left: 3rem;
+
+      &:not(:last-child):after {
+        content: "";
+        position: absolute;
+        left: 1.25rem;
+        top: 2.5rem;
+        bottom: -1.5rem;
+        width: 2px;
+        background: #e2e8f0;
+      }
+
+      .timeline-marker {
+        position: absolute;
+        left: 0.5rem;
+        top: 0.25rem;
+        width: 1.5rem;
+        height: 1.5rem;
+        background: var(--primary-gradient);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 0.75rem;
+        font-weight: 700;
+      }
+
+      .timeline-content {
+        flex: 1;
+
+        .timeline-title {
+          font-weight: 600;
+          color: #1e293b;
+          margin-bottom: 0.25rem;
+        }
+
+        .timeline-description {
+          color: #64748b;
+          font-size: 0.875rem;
+        }
+
+        .timeline-confidence {
+          display: inline-block;
+          margin-top: 0.25rem;
+          font-size: 0.75rem;
+          padding: 0.125rem 0.5rem;
+          border-radius: 10px;
+
+          &.validated {
+            background: #d1fae5;
+            color: #065f46;
+          }
+
+          &.contested {
+            background: #fef3c7;
+            color: #92400e;
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,158 @@
+<% content_for :head do %>
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="<%= request.original_url %>">
+<% end %>
+
+<h1 class="text-center mb-4 text-gradient">🤖 Should I Hire or Automate?</h1>
+
+<div class="info-box">
+  <strong>Get data-driven recommendations with transparent reasoning</strong> comparing:
+  <ul>
+    <li>Full-time hiring with total cost analysis</li>
+    <li>AI automation solutions with real pricing</li>
+    <li>AI agent ecosystems and marketplaces</li>
+    <li>Somewhere.com developer outsourcing</li>
+    <li>Hybrid approaches validated by critic AI</li>
+  </ul>
+  <p class="mt-3 mb-0">
+    <strong>New:</strong> All recommendations now include explicit reasoning chains and are validated by a critic agent for accuracy.
+  </p>
+</div>
+
+<%= form_with model: @analysis, url: analyses_path, html: { class: "staffcraft-form" } do |f| %>
+  <%= f.fields_for :form_data do |ff| %>
+
+    <div class="form-group">
+      <%= ff.label :process_description, "What process do you need help with?", class: "form-label" %>
+      <%= ff.text_area :process_description,
+          class: "form-control",
+          placeholder: "E.g., Handle 500+ customer support tickets daily, Process invoices, Manage social media content...",
+          required: true %>
+    </div>
+
+    <div class="form-group">
+      <%= ff.label :business_type, "Your business type", class: "form-label" %>
+      <%= ff.select :business_type,
+          options_for_select([
+            ['SaaS B2B', 'SaaS B2B'],
+            ['SaaS B2C', 'SaaS B2C'],
+            ['E-commerce', 'E-commerce'],
+            ['Agency', 'Agency'],
+            ['Consulting', 'Consulting'],
+            ['Other Services', 'Other Services']
+          ]),
+          { prompt: 'Select your business type' },
+          { class: "form-select", required: true } %>
+    </div>
+
+    <div class="form-group">
+      <%= ff.label :role_type, "What role would you hire for this?", class: "form-label" %>
+      <%= ff.text_field :role_type,
+          class: "form-control",
+          placeholder: "E.g., Customer Support Specialist, Data Entry Clerk, Content Manager...",
+          required: true %>
+    </div>
+
+    <div class="form-group">
+      <%= ff.label :experience_level, "Experience level needed", class: "form-label" %>
+      <%= ff.select :experience_level,
+          options_for_select([
+            ['Junior (0-2 years)', 'junior'],
+            ['Mid-level (2-5 years)', 'mid'],
+            ['Senior (5+ years)', 'senior'],
+            ['Expert (10+ years)', 'expert']
+          ]),
+          { prompt: 'Select experience level' },
+          { class: "form-select" } %>
+    </div>
+
+    <div class="form-group">
+      <%= ff.label :key_skills, "Key skills required", class: "form-label" %>
+      <%= ff.text_area :key_skills,
+          class: "form-control",
+          placeholder: "E.g., Zendesk, Excel, Python, Communication skills, Technical writing..." %>
+    </div>
+
+    <div class="form-group">
+      <%= ff.label :budget_range, "Monthly budget range (USD)", class: "form-label" %>
+      <%= ff.select :budget_range,
+          options_for_select([
+            ['< $2,000/month', '0-2000'],
+            ['$2,000 - $5,000/month', '2000-5000'],
+            ['$5,000 - $10,000/month', '5000-10000'],
+            ['$10,000 - $20,000/month', '10000-20000'],
+            ['> $20,000/month', '20000+']
+          ]),
+          { prompt: 'Select budget range' },
+          { class: "form-select" } %>
+    </div>
+
+    <div class="form-group">
+      <%= ff.label :country, "Your location/market", class: "form-label" %>
+      <%= ff.text_field :country,
+          class: "form-control",
+          placeholder: "E.g., United States, United Kingdom, Germany...",
+          required: true %>
+    </div>
+
+    <div class="form-group">
+      <%= ff.label :team_size, "Current team size", class: "form-label" %>
+      <%= ff.select :team_size,
+          options_for_select([
+            ['Just me', '1'],
+            ['2-5 people', '2-5'],
+            ['6-20 people', '6-20'],
+            ['21-50 people', '21-50'],
+            ['50+ people', '50+']
+          ]),
+          { prompt: 'Select team size' },
+          { class: "form-select" } %>
+    </div>
+
+    <div class="form-group">
+      <%= ff.label :technical_expertise, "Team's technical level", class: "form-label" %>
+      <%= ff.select :technical_expertise,
+          options_for_select([
+            ['Non-technical', 'non-technical'],
+            ['Basic (can use tools)', 'basic'],
+            ['Intermediate (can integrate APIs)', 'intermediate'],
+            ['Advanced (can code)', 'advanced']
+          ]),
+          { prompt: 'Select technical expertise' },
+          { class: "form-select" } %>
+    </div>
+
+    <div class="form-group">
+      <%= ff.label :current_stack, "Current tools/stack (if any)", class: "form-label" %>
+      <%= ff.text_area :current_stack,
+          class: "form-control",
+          placeholder: "E.g., Slack, Google Workspace, Salesforce, AWS..." %>
+    </div>
+
+    <div class="form-group">
+      <%= ff.label :constraints, "Any constraints or concerns?", class: "form-label" %>
+      <%= ff.text_area :constraints,
+          class: "form-control",
+          placeholder: "E.g., Limited IT support, Need 24/7 coverage, Compliance requirements, Team resistance to change..." %>
+    </div>
+
+    <div class="form-group">
+      <%= ff.label :timeline, "When do you need this solved?", class: "form-label" %>
+      <%= ff.select :timeline,
+          options_for_select([
+            ['ASAP', 'asap'],
+            ['Within 1 month', '1-month'],
+            ['Within 3 months', '3-months'],
+            ['Within 6 months', '6-months'],
+            ['Just exploring', 'exploring']
+          ]),
+          { prompt: 'Select timeline' },
+          { class: "form-select" } %>
+    </div>
+
+  <% end %>
+
+  <button type="submit" class="btn btn-primary-gradient">
+    🚀 Get AI-Powered Analysis with Reasoning
+  </button>
+<% end %>

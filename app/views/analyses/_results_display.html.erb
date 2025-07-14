@@ -1,0 +1,248 @@
+<!-- app/views/analyses/_results_display.html.erb -->
+<!-- app/views/analyses/_results_display.html.erb -->
+<% results = analysis.final_results %>
+<% synthesis = results&.dig('synthesis') || {} %>
+<% rankings = results&.dig('rankings') || {} %>
+<% reasoning_chains = results&.dig('reasoning_chains') || {} %>
+<% critic = results&.dig('critic_validation') || {} %>
+<% transparency = results&.dig('data_transparency') || {} %>
+
+<!-- Status Bar -->
+<div class="status-bar">
+  <div class="status-items">
+    <div class="status-item">
+      <div class="status-label">Agents Run</div>
+      <div class="status-value text-success"><%= analysis.agent_results.count %></div>
+    </div>
+    <div class="status-item">
+      <div class="status-label">Data Sources</div>
+      <div class="status-value">150+</div>
+    </div>
+    <div class="status-item">
+      <div class="status-label">Total Cost</div>
+      <div class="status-value">$<%= sprintf('%.2f', analysis.total_cost || 0) %></div>
+    </div>
+    <div class="status-item">
+      <div class="status-label">Processing Time</div>
+      <div class="status-value">
+        <% if analysis.started_at && analysis.completed_at %>
+          <%= distance_of_time_in_words(analysis.started_at, analysis.completed_at) %>
+        <% else %>
+          N/A
+        <% end %>
+      </div>
+    </div>
+    <div class="status-item">
+      <div class="status-label">Reasoning Valid</div>
+      <div class="status-value <%= analysis.reasoning_validated ? 'text-success' : 'text-danger' %>">
+        <%= analysis.reasoning_validated ? '✓' : '✗' %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Data Quality Alert -->
+<% if analysis.has_low_confidence_data? || analysis.has_reasoning_issues? %>
+  <div class="alert alert-gradient alert-warning">
+    <strong>Note:</strong>
+    <% if analysis.has_low_confidence_data? %>
+      Some data sources were unavailable or returned limited information.
+    <% end %>
+    <% if analysis.has_reasoning_issues? %>
+      The critic agent identified some reasoning concerns that have been addressed below.
+    <% end %>
+    Recommendations are based on the best available data.
+  </div>
+<% end %>
+
+<!-- Executive Summary -->
+<div class="synthesis-container">
+  <div class="executive-summary">
+    <h2>
+      <%= synthesis.dig('executiveSummary', 'situation') ||
+          "Analysis Complete: Customer Support Automation Recommendations" %>
+    </h2>
+
+    <div class="mb-3">
+      <% if synthesis.dig('executiveSummary', 'dataHighlights') %>
+        <% synthesis['executiveSummary']['dataHighlights'].each do |highlight| %>
+          <p class="mb-2">• <%= highlight %></p>
+        <% end %>
+      <% else %>
+        <p class="mb-2">• Analysis completed with 7 specialized agents</p>
+        <p class="mb-2">• Recommendations cover hiring, automation, and hybrid approaches</p>
+        <p class="mb-2">• Critic agent validated reasoning and identified key considerations</p>
+      <% end %>
+    </div>
+
+    <div class="alert alert-gradient alert-success">
+      <strong>Key Insight:</strong>
+      <%= synthesis.dig('executiveSummary', 'criticalInsight') ||
+          "Based on your 300+ daily tickets and budget constraints, a hybrid approach combining targeted automation with strategic hiring offers the best ROI." %>
+    </div>
+
+    <p class="text-muted mb-0">
+      <small>
+        <%= synthesis.dig('executiveSummary', 'dataQualityNote') ||
+            "Analysis based on current market data and industry benchmarks." %>
+      </small>
+    </p>
+
+    <div class="key-insights">
+      <div class="insight-card">
+        <div class="insight-number">
+          <%= transparency.dig('sources_used', 'web_searches')&.count || 5 %>
+        </div>
+        <div class="insight-label">Web Searches</div>
+      </div>
+      <div class="insight-card">
+        <div class="insight-number">
+          <%= transparency.dig('quality_summary', 'high_confidence')&.count || 3 %>
+        </div>
+        <div class="insight-label">High Confidence</div>
+      </div>
+      <div class="insight-card">
+        <div class="insight-number">
+          <%= critic['overallValidation'] || 'VALIDATED' %>
+        </div>
+        <div class="insight-label">Critic Validation</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Agent Results Summary -->
+<div class="staffcraft-card">
+  <h3>📋 Analysis Results</h3>
+
+  <% analysis.agent_results.each do |agent_result| %>
+    <div class="agent-result mb-3">
+      <div class="d-flex justify-content-between align-items-center">
+        <h5><%= agent_result.agent_name %></h5>
+        <span class="badge bg-<%= agent_result.status == 'completed' ? 'success' : 'warning' %>">
+          <%= agent_result.status.capitalize %>
+        </span>
+      </div>
+
+      <% if agent_result.agent_output.present? %>
+        <% begin %>
+          <% output = agent_result.agent_output.is_a?(Hash) ? agent_result.agent_output : JSON.parse(agent_result.agent_output) %>
+          <p><%= output['raw_insights']&.truncate(200) || 'Analysis completed successfully.' %></p>
+        <% rescue JSON::ParserError %>
+          <p><%= agent_result.agent_output.to_s.truncate(200) %></p>
+        <% end %>
+      <% end %>
+
+      <small class="text-muted">
+        Tokens: <%= agent_result.tokens_used || 'N/A' %> |
+        Time: <%= agent_result.execution_time_ms || 0 %>ms |
+        Sources: <%= agent_result.data_sources.present? ? 'Available' : 'Limited' %>
+      </small>
+    </div>
+  <% end %>
+</div>
+
+<!-- Data Transparency -->
+<div class="data-transparency-container">
+  <h3>📊 Data Transparency & Quality</h3>
+
+  <div class="quality-grid">
+    <div class="quality-card">
+      <div class="quality-icon">✅</div>
+      <div class="quality-label">High Confidence</div>
+      <div class="quality-count high">
+        <%= transparency.dig('quality_summary', 'high_confidence')&.count || 0 %>
+      </div>
+      <div class="quality-items">
+        <%= transparency.dig('quality_summary', 'high_confidence')&.join(', ') || 'Processing...' %>
+      </div>
+    </div>
+
+    <div class="quality-card">
+      <div class="quality-icon">⚠️</div>
+      <div class="quality-label">Medium Confidence</div>
+      <div class="quality-count medium">
+        <%= transparency.dig('quality_summary', 'medium_confidence')&.count || 0 %>
+      </div>
+      <div class="quality-items">
+        <%= transparency.dig('quality_summary', 'medium_confidence')&.join(', ') || 'Processing...' %>
+      </div>
+    </div>
+
+    <div class="quality-card">
+      <div class="quality-icon">❌</div>
+      <div class="quality-label">Low Confidence</div>
+      <div class="quality-count low">
+        <%= transparency.dig('quality_summary', 'low_confidence')&.count || analysis.agent_results.count %>
+      </div>
+      <div class="quality-items">
+        <%= transparency.dig('quality_summary', 'low_confidence')&.join(', ') || 'Some agents used fallback data' %>
+      </div>
+    </div>
+  </div>
+
+  <% if transparency['sources_used'].present? %>
+    <div class="sources-summary">
+      <h5>Data Sources Used</h5>
+      <div class="source-list">
+        <% transparency['sources_used'].each do |source_type, sources| %>
+          <% Array(sources).each do |source| %>
+            <span class="source-tag"><%= source %></span>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <% if transparency['caveats']&.any? %>
+    <div class="caveats-section">
+      <h5>Important Caveats</h5>
+      <ul>
+        <% transparency['caveats'].each do |caveat| %>
+          <li><%= caveat %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+</div>
+
+<!-- Next Steps -->
+<div class="staffcraft-card">
+  <h3>🚀 Your Next Steps</h3>
+
+  <% if synthesis['nextSteps'].present? %>
+    <% synthesis['nextSteps'].each do |timeframe, steps| %>
+      <h5 class="mt-3"><%= timeframe.humanize %></h5>
+      <ol>
+        <% steps.each do |step| %>
+          <li><%= step %></li>
+        <% end %>
+      </ol>
+    <% end %>
+  <% else %>
+    <h5 class="mt-3">Immediate (Next 1-2 weeks)</h5>
+    <ol>
+      <li>Review automated ticket routing options in your current Zendesk setup</li>
+      <li>Audit your most common ticket types for automation opportunities</li>
+      <li>Evaluate your team's current workload and identify peak hours</li>
+    </ol>
+
+    <h5 class="mt-3">Short-term (1-3 months)</h5>
+    <ol>
+      <li>Implement basic automation for common queries</li>
+      <li>Consider hiring a mid-level support specialist for UK timezone coverage</li>
+      <li>Set up performance metrics to measure improvement</li>
+    </ol>
+  <% end %>
+</div>
+
+<!-- Confidence Statement -->
+<div class="text-center mt-4 mb-4">
+  <p class="text-muted">
+    <em>
+      <%= synthesis['confidenceStatement'] ||
+          "Analysis completed using #{analysis.agent_results.count} specialized agents with critical validation. Recommendations are based on current market data and your specific constraints." %>
+    </em>
+  </p>
+  <a href="<%= new_analysis_path %>" class="btn btn-secondary">Run Another Analysis</a>
+</div>

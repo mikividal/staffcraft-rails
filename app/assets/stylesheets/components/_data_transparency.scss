@@ -1,0 +1,109 @@
+.data-transparency-container {
+  background: linear-gradient(135deg, #e0f2fe 0%, #ddd6fe 100%);
+  border: 1px solid #7dd3c0;
+  border-radius: var(--border-radius);
+  padding: 2rem;
+  margin: 2rem 0;
+
+  h3 {
+    color: #0f766e;
+    margin-bottom: 1.5rem;
+  }
+
+  .quality-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+
+    .quality-card {
+      background: white;
+      border-radius: calc(var(--border-radius) / 2);
+      padding: 1.25rem;
+      text-align: center;
+
+      .quality-icon {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .quality-label {
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 0.5rem;
+      }
+
+      .quality-count {
+        font-size: 2rem;
+        font-weight: 700;
+
+        &.high { color: #10b981; }
+        &.medium { color: #f59e0b; }
+        &.low { color: #ef4444; }
+      }
+
+      .quality-items {
+        margin-top: 0.5rem;
+        font-size: 0.875rem;
+        color: #64748b;
+      }
+    }
+  }
+
+  .sources-summary {
+    background: white;
+    border-radius: calc(var(--border-radius) / 2);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+
+    h5 {
+      color: #0f766e;
+      margin-bottom: 1rem;
+    }
+
+    .source-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+
+      .source-tag {
+        background: #e0f2fe;
+        color: #0c4a6e;
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.875rem;
+        font-weight: 500;
+      }
+    }
+  }
+
+  .caveats-section {
+    background: #fef3c7;
+    border: 1px solid #fbbf24;
+    border-radius: calc(var(--border-radius) / 2);
+    padding: 1.5rem;
+
+    h5 {
+      color: #78350f;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      &:before {
+        content: "⚠️";
+        font-size: 1.25rem;
+      }
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 1.5rem;
+
+      li {
+        color: #92400e;
+        margin-bottom: 0.5rem;
+      }
+    }
+  }
+}

@@ -11,10 +11,20 @@ module StaffcraftR
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 7.1
 
+
+    config.active_job.queue_adapter = :sidekiq
+
+    # Asset configuration
+    config.assets.paths << Rails.root.join("app", "assets", "stylesheets")
+    config.assets.precompile += %w( application.scss )
     # Please, add to the `ignore` list any other `lib` subdirectories that do
     # not contain `.rb` files, or that should not be reloaded or eager loaded.
     # Common ones are `templates`, `generators`, or `middleware`, for example.
     config.autoload_lib(ignore: %w(assets tasks))
+
+    # Configure job queue names
+    # config.active_job.queue_name_prefix = Rails.env
+    # config.active_job.queue_name_delimiter = '.'
 
     # Configuration for the application, engines, and railties goes here.
     #

@@ -1,0 +1,37 @@
+<!-- app/views/analyses/_reasoning_chain.html.erb -->
+<div class="reasoning-chain-container">
+  <h6>Reasoning Chain</h6>
+
+  <% if chain && chain.any? %>
+    <% chain.each do |step| %>
+      <div class="reasoning-step" data-step="<%= step['step'] %>">
+        <div class="step-action"><%= step['action'] %></div>
+        <div class="step-source">Source: <%= step['source'] %></div>
+        <div class="step-result"><%= step['result'] %></div>
+        <span class="step-confidence <%= step['confidence'] %>">
+          <%= step['confidence'] %>
+        </span>
+      </div>
+    <% end %>
+  <% end %>
+
+  <% if assumptions && assumptions.any? %>
+    <div class="reasoning-assumptions">
+      <h6>Key Assumptions</h6>
+      <ul>
+        <% assumptions.each do |assumption| %>
+          <li><%= assumption %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <% if confidence %>
+    <p class="mt-2 mb-0">
+      <strong>Overall Confidence:</strong>
+      <span class="confidence-indicator <%= confidence.split('-').first.downcase %>">
+        <%= confidence %>
+      </span>
+    </p>
+  <% end %>
+</div>

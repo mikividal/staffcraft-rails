@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>StaffCraft - Hiring vs Automation Analysis</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= javascript_include_tag "application", "data-turbo-track": "reload", defer: true %>
+
+    <%= yield(:head) if content_for?(:head) %>
+  </head>
+
+  <body>
+    <div class="container-fluid analysis-page">
+      <!-- No column restrictions for wider results -->
+      <%= yield %>
+    </div>
+
+    <%= yield(:body_end) if content_for?(:body_end) %>
+  </body>
+</html>

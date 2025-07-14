@@ -1,0 +1,21 @@
+:concurrency: 5
+:max_retries: 3
+
+:queues:
+  - [critical, 6]
+  - [default, 4]
+  - [low, 2]
+
+:timeout: 300
+
+development:
+  :concurrency: 2
+
+production:
+  :concurrency: 10
+
+# Optional: Sidekiq Cron for scheduled jobs (if needed)
+# :schedule:
+#   cleanup_old_analyses:
+#     cron: "0 2 * * *"
+#     class: "CleanupOldAnalysesJob"

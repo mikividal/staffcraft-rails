@@ -13,3 +13,19 @@
  *= require_tree .
  *= require_self
  */
+@import "bootstrap";
+@import "base/variables";
+@import "base/typography";
+@import "base/utilities";
+@import "components/alert";
+@import "components/button";
+@import "components/card";
+@import "components/critic_review";
+@import "components/data_transparency";
+@import "components/form";
+@import "components/info_box";
+@import "components/progress";
+@import "components/ranking";
+@import "components/reasoning_chain";
+@import "components/status_bar";
+@import "components/synthesis";
