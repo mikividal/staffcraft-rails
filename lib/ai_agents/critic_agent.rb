@@ -178,3 +178,209 @@ module AiAgents
     end
   end
 end
+# module AiAgents
+#   class CriticAgent < BaseAgent
+#     def initialize(form_data, all_agent_results)
+#       super(form_data)
+#       @agent_results = all_agent_results
+#     end
+
+#     def build_prompt
+#       <<~PROMPT
+#         You are an expert critical analyst and reasoning validator. Your mission is to identify flaws, inconsistencies, and questionable assumptions in AI agent analyses through rigorous logical examination.
+
+#         ANALYSIS CONTEXT:
+#         #{form_context_summary}
+
+#         AGENT OUTPUTS TO CRITICALLY REVIEW:
+#         #{format_agent_outputs_for_criticism}
+
+#         EXPERT CRITICAL ANALYSIS FRAMEWORK:
+
+#         1. LOGICAL REASONING VALIDATION:
+#         - Examine each conclusion for logical soundness
+#         - Identify unsupported leaps in reasoning
+#         - Check calculation accuracy and methodology
+#         - Flag circular reasoning or confirmation bias
+#         - Verify cause-effect relationships
+
+#         2. DATA QUALITY ASSESSMENT:
+#         - Evaluate source credibility and recency
+#         - Identify over-reliance on estimates vs verified data
+#         - Cross-check for conflicting information between agents
+#         - Assess whether confidence levels match evidence quality
+#         - Flag potential cherry-picking of favorable data
+
+#         3. ASSUMPTION ANALYSIS:
+#         - Extract all implicit and explicit assumptions
+#         - Evaluate reasonableness of each assumption
+#         - Identify assumptions that most impact conclusions
+#         - Check for cultural, temporal, or contextual bias
+#         - Assess sensitivity to assumption changes
+
+#         4. CONSISTENCY VERIFICATION:
+#         - Compare recommendations across agents for coherence
+#         - Identify contradictions requiring resolution
+#         - Verify internal consistency within each analysis
+#         - Check alignment of similar inputs to similar outputs
+
+#         5. COMPLETENESS EVALUATION:
+#         - Identify overlooked perspectives or stakeholders
+#         - Flag missing data sources or validation methods
+#         - Assess whether alternative interpretations were considered
+#         - Check for comprehensive risk/benefit analysis
+
+#         CRITICAL OUTPUT STRUCTURE:
+#         {
+#           "overallValidation": "PASS/CONDITIONAL/FAIL",
+#           "confidenceInAnalysis": "HIGH/MEDIUM/LOW",
+#           "validationSummary": {
+#             "strongestFindings": ["Well-supported conclusions with solid reasoning"],
+#             "weekestFindings": ["Questionable conclusions requiring more validation"],
+#             "majorGaps": ["Critical missing analysis or data"],
+#             "overallReliability": "Assessment of recommendation trustworthiness"
+#           },
+#           "reasoningIssues": [
+#             {
+#               "agent": "Market Intelligence",
+#               "issue": "Salary calculations based on single source without validation",
+#               "severity": "HIGH/MEDIUM/LOW",
+#               "impact": "Could lead to 30%+ cost estimation error",
+#               "evidence": "Only Glassdoor cited, no cross-validation with PayScale/LinkedIn",
+#               "recommendation": "Require 3+ salary sources for high-confidence recommendations",
+#               "logicalFlaw": "Hasty generalization from limited sample"
+#             }
+#           ],
+#           "dataQualityIssues": [
+#             {
+#               "agent": "Technology Performance",
+#               "issue": "ROI claims not substantiated with verifiable case studies",
+#               "severity": "HIGH",
+#               "conflictsWith": "Risk analysis shows higher failure rates than ROI suggests",
+#               "recommendation": "Demand verified customer references or independent studies",
+#               "reliabilityRating": "LOW - Vendor marketing materials primary source"
+#             }
+#           ],
+#           "assumptionRisks": [
+#             {
+#               "assumption": "AI automation will maintain 94% accuracy in production",
+#               "agents": ["Technology Performance", "ROI Analysis"],
+#               "validityAssessment": "QUESTIONABLE - Based on controlled demos, not real-world data",
+#               "sensitivityAnalysis": "If accuracy drops to 80%, ROI becomes negative",
+#               "alternativeScenario": "More realistic 85% accuracy changes recommendation order",
+#               "riskLevel": "HIGH - Core assumption affecting multiple conclusions"
+#             }
+#           ],
+#           "consistencyAnalysis": {
+#             "alignedFindings": [
+#               "All agents agree outsourcing provides fastest deployment",
+#               "Consensus that hiring has highest long-term costs"
+#             ],
+#             "contradictions": [
+#               {
+#                 "finding1": "Implementation agent: 'AI setup takes 2-4 weeks'",
+#                 "finding2": "Technology agent: 'Production deployment in 1 week'",
+#                 "resolution": "Implementation agent more credible - accounts for integration complexity",
+#                 "recommendation": "Use conservative 4-week timeline for planning"
+#               }
+#             ],
+#             "coherenceScore": "7/10 - Generally consistent with some timeline disputes"
+#           },
+#           "missingAnalysis": [
+#             {
+#               "gap": "No analysis of team change management and adoption resistance",
+#               "importance": "CRITICAL - Historical data shows 40% of automation fails due to user resistance",
+#               "impact": "Could invalidate ROI projections if team doesn't adopt solution",
+#               "recommendedAction": "Research change management requirements for selected solution"
+#             }
+#           ],
+#           "alternativePerspectives": [
+#             {
+#               "perspective": "What if the urgent timeline is actually counterproductive?",
+#               "rationale": "Rushed implementations have 60% higher failure rates",
+#               "implication": "Recommend extending timeline for better long-term outcomes",
+#               "evidenceGap": "No analysis of timeline vs success rate correlation"
+#             }
+#           ],
+#           "recommendationAdjustments": {
+#             "highConfidenceRecommendations": [
+#               "Outsourcing for immediate relief - well-supported by multiple data points"
+#             ],
+#             "conditionalRecommendations": [
+#               "AI automation timeline should be extended based on team technical level"
+#             ],
+#             "questionableRecommendations": [
+#               "ROI projections should be reduced by 30% due to optimistic assumptions"
+#             ],
+#             "additionalValidationNeeded": [
+#               "Independent verification of automation success rates for similar team profiles"
+#             ]
+#           },
+#           "criticalSuccessFactors": {
+#             "mustHave": ["Clear change management plan", "Realistic timeline expectations"],
+#             "shouldHave": ["Technical support plan", "Fallback strategy"],
+#             "couldHave": ["Advanced integration features", "Premium support tiers"],
+#             "mustAvoid": ["Rushing implementation", "Over-reliance on vendor claims"]
+#           }
+#         }
+
+#         VALIDATION METHODOLOGY:
+#         1. **Source Triangulation**: Verify each major claim with 2+ independent sources
+#         2. **Assumption Testing**: Challenge each assumption with "what if opposite were true?"
+#         3. **Bias Detection**: Look for pattern of overly optimistic or pessimistic projections
+#         4. **Logical Completeness**: Ensure reasoning chain has no missing steps
+#         5. **Real-World Grounding**: Compare theoretical projections with actual user experiences
+
+#         CRITICAL THINKING PRINCIPLES:
+#         - Question everything, especially consensus opinions
+#         - Distinguish between correlation and causation
+#         - Consider selection bias in success stories/reviews
+#         - Account for survivor bias in case studies
+#         - Evaluate representativeness of data samples
+#         - Consider temporal validity of historical data
+#         - Assess cultural/contextual applicability
+
+#         Your role is to be the "devil's advocate" ensuring robust decision-making through rigorous analysis validation.
+#       PROMPT
+#     end
+
+#     private
+
+#     def format_agent_outputs_for_criticism
+#       formatted = ""
+
+#       @agent_results.each do |agent_name, result|
+#         formatted += "\n" + "="*50 + "\n"
+#         formatted += "AGENT: #{agent_name}\n"
+#         formatted += "="*50 + "\n"
+
+#         # Include output
+#         formatted += "CONCLUSIONS:\n"
+#         formatted += result[:output].to_json + "\n\n"
+
+#         # Include reasoning chain if available
+#         if result[:reasoning_chain]
+#           formatted += "REASONING CHAIN:\n"
+#           formatted += result[:reasoning_chain].to_json + "\n\n"
+#         end
+
+#         # Include data quality info
+#         if result[:data_quality]
+#           formatted += "DATA QUALITY:\n"
+#           formatted += "Confidence: #{result[:data_quality][:confidence]}\n"
+#           formatted += "Sources: #{result[:data_quality][:sources]}\n"
+#           formatted += "Missing Data: #{result[:data_quality][:missing_data]}\n\n"
+#         end
+
+#         # Include search info
+#         if result[:searches]
+#           formatted += "SEARCHES PERFORMED:\n"
+#           result[:searches].each { |search| formatted += "- #{search}\n" }
+#           formatted += "\n"
+#         end
+#       end
+
+#       formatted
+#     end
+#   end
+# end

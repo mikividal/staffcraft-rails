@@ -1,22 +1,22 @@
 class AnalysisOrchestrator
   PARALLEL_AGENTS = [
-    { name: 'Market & Salary Intelligence', class_name: 'AiAgents::MarketIntelligence', tokens: 3500 },
-    { name: 'Technology & Tools Performance', class_name: 'AiAgents::TechnologyPerformance', tokens: 3500 },
-    { name: 'Implementation Feasibility', class_name: 'AiAgents::ImplementationFeasibility', tokens: 3000 },
-    { name: 'ROI & Business Impact', class_name: 'AiAgents::RoiBusinessImpact', tokens: 3000 },
-    { name: 'Risk & Compliance Analysis', class_name: 'AiAgents::RiskCompliance', tokens: 2500 }
+    { name: 'Market & Salary Intelligence', class_name: 'AiAgents::MarketIntelligence', tokens: 600 },
+    { name: 'Technology & Tools Performance', class_name: 'AiAgents::TechnologyPerformance', tokens: 600 },
+    { name: 'Implementation Feasibility', class_name: 'AiAgents::ImplementationFeasibility', tokens: 500 },
+    { name: 'ROI & Business Impact', class_name: 'AiAgents::RoiBusinessImpact', tokens: 500},
+    { name: 'Risk & Compliance Analysis', class_name: 'AiAgents::RiskCompliance', tokens: 400}
   ].freeze
 
   CRITIC_AGENT = {
     name: 'Critical Analysis & Validation',
     class_name: 'AiAgents::CriticAgent',
-    tokens: 4000
+    tokens: 2000
   }.freeze
 
   SYNTHESIZER = {
     name: 'Strategic Options Synthesizer',
     class_name: 'AiAgents::StrategicSynthesizer',
-    tokens: 3000
+    tokens: 1500
   }.freeze
 
   def initialize(analysis)
@@ -364,10 +364,24 @@ class AnalysisOrchestrator
     @analysis.agent_results.each do |result|
       next unless result.reasoning_chain
 
+      # Safely parse reasoning_chain whether it's a String or Hash
+      reasoning_data = case result.reasoning_chain
+                      when Hash
+                        result.reasoning_chain
+                      when String
+                        begin
+                          JSON.parse(result.reasoning_chain)
+                        rescue JSON::ParserError
+                          { 'error' => 'Invalid JSON in reasoning chain' }
+                        end
+                      else
+                        { 'error' => 'Unknown reasoning chain format' }
+                      end
+
       chains[result.agent_name] = {
-        steps: result.reasoning_chain['steps'] || [],
-        confidence: result.reasoning_chain['confidence'] || 'unvalidated',
-        key_assumptions: result.reasoning_chain['key_assumptions'] || []
+        steps: reasoning_data['steps'] || reasoning_data[:steps] || [],
+        confidence: reasoning_data['confidence'] || reasoning_data[:confidence] || 'unvalidated',
+        key_assumptions: reasoning_data['key_assumptions'] || reasoning_data[:key_assumptions] || []
       }
     end
 

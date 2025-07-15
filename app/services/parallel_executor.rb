@@ -21,28 +21,32 @@ class ParallelExecutor
   private
 
   def self.determine_execution_strategy(total_tokens, agent_count)
-    rate_limit_capacity = ClaudeClient::TOKEN_LIMIT_PER_MINUTE * ClaudeClient::BUFFER_PERCENTAGE
-    current_usage = ClaudeClient.rate_limit_stats[:current_usage]
-    available_capacity = rate_limit_capacity - current_usage
-
-    Rails.logger.debug "Strategy decision: #{total_tokens} tokens needed, #{available_capacity} available"
-
-    # Si no hay suficiente capacidad disponible, ir secuencial
-    if total_tokens > available_capacity
-      Rails.logger.info "Not enough rate limit capacity, using sequential execution"
-      return :sequential
-    end
-
-    # Si hay muchos agentes pero capacidad limitada, usar batches
-    if agent_count > 3 && total_tokens > (rate_limit_capacity * 0.6)
-      Rails.logger.info "High token usage with multiple agents, using batch execution"
-      return :batch
-    end
-
-    # Si hay pocos agentes y capacidad suficiente, paralelo
-    Rails.logger.info "Sufficient capacity available, using parallel execution"
-    :parallel
+  # Force sequential for now due to severe rate limit issues
+    Rails.logger.info "Forcing sequential execution due to immediate rate limit failures"
+    return :sequential
   end
+    # rate_limit_capacity = ClaudeClient::TOKEN_LIMIT_PER_MINUTE * ClaudeClient::BUFFER_PERCENTAGE
+    # current_usage = ClaudeClient.rate_limit_stats[:current_usage]
+    # available_capacity = rate_limit_capacity - current_usage
+
+    # Rails.logger.debug "Strategy decision: #{total_tokens} tokens needed, #{available_capacity} available"
+
+    # # Si no hay suficiente capacidad disponible, ir secuencial
+    # if total_tokens > available_capacity
+    #   Rails.logger.info "Not enough rate limit capacity, using sequential execution"
+    #   return :sequential
+    # end
+
+    # # Si hay muchos agentes pero capacidad limitada, usar batches
+    # if agent_count > 3 && total_tokens > (rate_limit_capacity * 0.6)
+    #   Rails.logger.info "High token usage with multiple agents, using batch execution"
+    #   return :batch
+    # end
+
+    # # Si hay pocos agentes y capacidad suficiente, paralelo
+    # Rails.logger.info "Sufficient capacity available, using parallel execution"
+    # :parallel
+  # end
 
   def self.execute_sequential(agents, form_data)
     Rails.logger.info "Executing #{agents.size} agents sequentially"
@@ -270,14 +274,14 @@ class ParallelExecutor
 
   def self.calculate_inter_agent_pause(agent_tokens, execution_time)
     # Pausa más larga para agentes que usan más tokens
-    base_pause = 1
+    base_pause = 90
     token_factor = (agent_tokens / 1000.0).ceil
 
     # Pausa más corta si el agente fue rápido (probablemente no hizo web search)
     time_factor = execution_time < 10 ? 0.5 : 1.0
 
     pause = (base_pause + token_factor) * time_factor
-    [pause, 5].min # Máximo 5 segundos
+    [pause, 180].min # Máximo 5 segundos
   end
 
   def self.calculate_inter_batch_pause(batch, batch_execution_time)
