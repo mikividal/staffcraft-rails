@@ -3,6 +3,7 @@
   <meta name="robots" content="noindex, nofollow">
 <% end %>
 
+
 <% content_for :body_end do %>
   <% if @analysis.pending? || @analysis.processing? || @analysis.validating? %>
     <script>
@@ -13,7 +14,7 @@
   <% end %>
 <% end %>
 
-<div class="col-12 col-lg-10">
+<div>
   <h1 class="text-center mb-4 text-gradient">
     <%= @analysis.completed? ? "🎯 Your Analysis Results" : "🔄 Analyzing Your Options..." %>
   </h1>
@@ -47,6 +48,6 @@
       </p>
     </div>
   <% else %>
-    <%= render 'results_display', analysis: @analysis %>
+    <%= render 'results_display2', analysis: @analysis %>
   <% end %>
 </div>

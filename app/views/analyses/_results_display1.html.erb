@@ -1,0 +1,29 @@
+<div class="staffcraft-card">
+  <h3>📋 Analysis Results</h3>
+
+  <% analysis.agent_results.each do |agent_result| %>
+    <div class="agent-result mb-3">
+      <div class="d-flex justify-content-between align-items-center">
+        <h5><%= agent_result.agent_name %></h5>
+        <span class="badge bg-<%= agent_result.status == 'completed' ? 'success' : 'warning' %>">
+          <%= agent_result.status.capitalize %>
+        </span>
+      </div>
+
+      <% if agent_result.agent_output.present? %>
+        <% begin %>
+          <% output = agent_result.agent_output.is_a?(Hash) ? agent_result.agent_output : JSON.parse(agent_result.agent_output) %>
+            <p><%= output['raw_insights'] || 'Analysis completed successfully.' %></p>
+        <% rescue JSON::ParserError %>
+          <p><%= agent_result.agent_output.to_s.truncate(1000) %></p>
+        <% end %>
+      <% end %>
+
+      <small class="text-muted">
+        Tokens: <%= agent_result.tokens_used || 'N/A' %> |
+        Time: <%= agent_result.execution_time_ms || 0 %>ms |
+        Sources: <%= agent_result.data_sources.present? ? 'Available' : 'Limited' %>
+      </small>
+    </div>
+  <% end %>
+</div>

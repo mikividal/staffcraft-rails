@@ -22,6 +22,7 @@ gem 'sassc-rails'
 gem 'turbo-rails'
 gem 'stimulus-rails'
 gem "importmap-rails"
+gem "simple_form"
 
 # Utilities
 gem 'dotenv-rails'
@@ -37,3 +38,5 @@ group :development do
   gem 'listen', '~> 3.3'
   gem 'spring'
 end
+
+gem 'gemini-ai', '~> 4.3'

@@ -1,0 +1,10 @@
+<% @analysis.agent_results.each do |agent_result| %>
+
+  <h5><%= agent_result.agent_name %></h5>
+    <%= agent_result.status.capitalize %>
+      <pre style="white-space: pre-wrap; max-height: none;">
+        <%= agent_result.agent_output.to_s %>
+      </pre>
+
+
+<% end %>

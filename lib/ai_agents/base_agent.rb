@@ -1,203 +1,110 @@
-# lib/ai_agents/base_agent.rb
+
 module AiAgents
   class BaseAgent
     def initialize(form_data, previous_results = {})
       @form_data = form_data.respond_to?(:to_context_hash) ? form_data.to_context_hash : form_data
       @previous_results = previous_results
-      @data_quality_context = previous_results['Data Quality Summary'] if previous_results
-    end
-
-    def execute
-      start_time = Time.current
-
-      begin
-        # Build the prompt
-        prompt = build_prompt
-
-        # Call Claude API
-        client = ClaudeClient.new
-        response = client.call(prompt)
-
-        # Calculate execution time
-        execution_time = ((Time.current - start_time) * 1000).round
-
-        # Process response and extract structured data
-        processed_response = process_response(response)
-
-        # Return structured result
-        {
-          status: 'completed',
-          agent_output: processed_response[:output],
-          data_sources: processed_response[:sources],
-          reasoning_chain: processed_response[:reasoning],
-          execution_time_ms: execution_time,
-          tokens_used: response[:usage]&.dig(:total_tokens) || 0,
-          data_quality: processed_response[:quality],
-          validation_status: processed_response[:validation]
-        }
-
-      rescue => e
-        execution_time = ((Time.current - start_time) * 1000).round
-        Rails.logger.error "Agent #{self.class.name} failed: #{e.message}"
-
-        # Return error result with fallback
-        {
-          status: 'failed',
-          agent_output: { error: e.message, fallback: generate_fallback_response },
-          data_sources: { error: "Failed to fetch data", source: "error" },
-          reasoning_chain: { error: "Execution failed", steps: [] },
-          execution_time_ms: execution_time,
-          tokens_used: 0,
-          error_message: e.message
-        }
-      end
     end
 
     def build_prompt
       raise NotImplementedError, "Subclasses must implement build_prompt"
     end
 
+    def execute
+      start_time = Time.current
+
+      begin
+        prompt = build_prompt
+        client = GeminiClient.new
+        response = client.complete_with_search(prompt, max_tokens: token_limit)
+
+        {
+          output: parse_json_response(response[:content]),
+          tokens_used: response.dig(:usage, :total_tokens) || 0,
+          execution_time: Time.current - start_time,
+          status: response[:status]
+        }
+      rescue => e
+        Rails.logger.error "Agent #{self.class.name} failed: #{e.message}"
+
+        {
+          output: { error: e.message },
+          tokens_used: 0,
+          execution_time: Time.current - start_time,
+          status: 'error'
+        }
+      end
+    end
+
+    # private
+
+    #  def safe_token_count(response)
+    #   return 0 unless response.is_a?(Hash)
+
+    #   usage = response[:usage] || response["usage"]
+    #   return 0 unless usage
+
+    #   usage[:total_tokens] || usage["total_tokens"] || 0
+    # rescue => e
+    #   Rails.logger.warn "⚠️ Could not extract token count in #{self.class.name}: #{e.message}"
+    #   0
+    # end
+
     protected
 
-    def process_response(response)
-      content = response[:content] || response.to_s
+    def token_limit
+      # Override in subclasses if needed
+      1500
+    end
 
-      # Try to extract JSON from the response
-      json_match = content.match(/```json\s*(\{.*?\})\s*```/m)
-      if json_match
-        begin
-          parsed_json = JSON.parse(json_match[1])
-          return {
-            output: parsed_json,
-            sources: extract_sources(content),
-            reasoning: extract_reasoning(parsed_json),
-            quality: assess_data_quality(parsed_json),
-            validation: "structured_json"
-          }
-        rescue JSON::ParserError
-          # Fall through to raw processing
+
+    def parse_json_response(content)
+      # Log the raw response for debugging
+      Rails.logger.info "AGENT #{self.class.name} RAW RESPONSE: #{content}..."
+
+      # Clean the content first
+      cleaned_content = content.strip
+
+      # Remove any markdown formatting if present
+      if cleaned_content.start_with?('```json')
+        json_match = cleaned_content.match(/```json\s*(\{.*?\})\s*```/m)
+        if json_match
+          cleaned_content = json_match[1]
         end
       end
 
-      # If no valid JSON found, return raw insights
-      {
-        output: { raw_insights: content },
-        sources: extract_sources_from_raw(content),
-        reasoning: { error: "No structured reasoning found" },
-        quality: { confidence: "low", source: "claude_knowledge" },
-        validation: "no_json"
-      }
-    end
-
-    def extract_sources(content)
-      sources = {
-        searches: extract_search_queries(content),
-        data_quality: { confidence: "low", source: "claude_knowledge" },
-        validation_status: "no_json"
-      }
-
-      # Look for search indicators
-      if content.include?("web_search") || content.include?("searching")
-        sources[:data_quality][:confidence] = "medium"
-        sources[:data_quality][:source] = "attempted_search"
-      end
-
-      sources
-    end
-
-    def extract_sources_from_raw(content)
-      {
-        searches: extract_search_queries(content),
-        data_quality: { confidence: "low", source: "claude_knowledge" },
-        validation_status: "no_json"
-      }
-    end
-
-    def extract_search_queries(content)
-      # Extract search queries from content
-      queries = []
-
-      # Look for patterns like "search for", "searching", etc.
-      search_patterns = [
-        /search(?:ing)?\s+for[:\s]+([^.\n]+)/i,
-        /look(?:ing)?\s+up[:\s]+([^.\n]+)/i,
-        /find(?:ing)?\s+data\s+on[:\s]+([^.\n]+)/i
-      ]
-
-      search_patterns.each do |pattern|
-        content.scan(pattern) do |match|
-          query = match[0].strip.gsub(/['""]/, '')
-          queries << query if query.length > 10 && query.length < 100
+      # Try to parse as JSON
+      begin
+        parsed = JSON.parse(cleaned_content)
+        Rails.logger.info "AGENT #{self.class.name} SUCCESSFULLY PARSED JSON"
+        return parsed
+      rescue JSON::ParserError
+        # If direct parsing fails, try to extract JSON from the response
+        json_match = content.match(/\{.*\}/m)
+        if json_match
+          begin
+            parsed = JSON.parse(json_match[0])
+            Rails.logger.info "AGENT #{self.class.name} EXTRACTED AND PARSED JSON"
+            return parsed
+          rescue JSON::ParserError
+            Rails.logger.error "AGENT #{self.class.name} FAILED TO PARSE EXTRACTED JSON"
+          end
         end
-      end
 
-      # Add some default searches based on the agent type
-      if queries.empty?
-        queries = generate_default_searches
-      end
-
-      queries.uniq.first(3) # Limit to 3 searches
-    end
-
-    def generate_default_searches
-      agent_name = self.class.name.split('::').last
-      role = @form_data['role_type'] || 'support specialist'
-      location = @form_data['country'] || 'United Kingdom'
-
-      case agent_name
-      when 'MarketIntelligence'
-        ["#{role} salary #{location} 2024 Glassdoor Indeed"]
-      when 'TechnologyPerformance'
-        ["#{@form_data['current_stack']} automation pricing 2024"]
-      when 'ImplementationFeasibility'
-        ["#{@form_data['process_description']} automation success story"]
-      when 'RoiBusinessImpact'
-        ["#{@form_data['business_type']} automation ROI case studies 2024"]
-      when 'RiskCompliance'
-        ["#{@form_data['business_type']} automation risks compliance"]
-      else
-        ["#{role} hiring vs automation analysis"]
+        Rails.logger.error "AGENT #{self.class.name} JSON PARSE ERROR. Content: #{content}"
+        # Return a structured fallback
+        return {
+          "summary" => content.strip,
+          "analysis" => content.strip,
+          "confidence_level" => "LOW",
+          "key_findings" => ["Analysis completed but format issue occurred"],
+          "recommendations" => ["Review the analysis manually"],
+          "data_sources" => "Gemini analysis"
+        }
       end
     end
 
-    def extract_reasoning(parsed_json)
-      reasoning = parsed_json['reasoningChain'] || parsed_json['reasoning_chain'] || []
-      confidence = parsed_json['reasoningConfidence'] || parsed_json['reasoning_confidence'] || 'unvalidated'
-      assumptions = parsed_json['keyAssumptions'] || parsed_json['key_assumptions'] || []
-
-      {
-        steps: reasoning,
-        confidence: confidence,
-        key_assumptions: assumptions
-      }
-    end
-
-    def assess_data_quality(parsed_json)
-      # Simple quality assessment based on structure
-      has_reasoning = (parsed_json['reasoningChain'] || parsed_json['reasoning_chain']).present?
-      has_sources = (parsed_json['dataSources'] || parsed_json['data_sources']).present?
-
-      if has_reasoning && has_sources
-        { confidence: "high", completeness: "full" }
-      elsif has_reasoning || has_sources
-        { confidence: "medium", completeness: "partial" }
-      else
-        { confidence: "low", completeness: "minimal" }
-      end
-    end
-
-    def generate_fallback_response
-      agent_name = self.class.name.split('::').last
-
-      "I'll help gather and analyze this data with full transparency and structured reasoning. " \
-      "Let me search for current information."
-    end
-
-    def knowledge_base_url
-      "http://localhost:3000/knowledge_base"
-    end
-
-    def form_context_summary
+    def form_context
       <<~CONTEXT
         Process: #{@form_data['process_description']}
         Business: #{@form_data['business_type']}
@@ -213,65 +120,13 @@ module AiAgents
       CONTEXT
     end
 
-    def reasoning_instructions
-      <<~INSTRUCTIONS
-        CRITICAL: For EVERY conclusion or recommendation, you MUST provide explicit reasoning chains.
-
-        Structure your reasoning as follows:
-        "reasoningChain": [
-          {
-            "step": 1,
-            "action": "What data or calculation was performed",
-            "source": "Where the data came from",
-            "result": "What was found or calculated",
-            "confidence": "HIGH/MEDIUM/LOW"
-          },
-          {
-            "step": 2,
-            "action": "Next step in the reasoning",
-            "source": "Source for this step",
-            "result": "Result of this step",
-            "confidence": "Confidence level"
-          }
-        ],
-        "reasoningConfidence": "Overall confidence in the reasoning chain",
-        "keyAssumptions": [
-          "List any assumptions made in the reasoning",
-          "Be explicit about what could affect the conclusions"
-        ]
-
-        Example reasoning for a cost calculation:
-        {
-          "step": 1,
-          "action": "Retrieved base salary data for role",
-          "source": "Glassdoor 2024 data for location",
-          "result": "$75,000 annual base salary",
-          "confidence": "HIGH"
-        },
-        {
-          "step": 2,
-          "action": "Calculated benefits cost at industry standard 30%",
-          "source": "BLS employer cost data",
-          "result": "$22,500 annual benefits cost",
-          "confidence": "MEDIUM"
-        },
-        {
-          "step": 3,
-          "action": "Added base + benefits for total compensation",
-          "source": "Calculation from steps 1 and 2",
-          "result": "$97,500 total annual cost",
-          "confidence": "HIGH"
-        }
-      INSTRUCTIONS
-    end
-
     def data_quality_instructions
       <<~INSTRUCTIONS
         IMPORTANT: Data Source Transparency
 
         For EVERY data point in your response, indicate the source:
         - If from web search: Mark as "Source: [platform name]"
-        - If from Claude's training: Mark as "Source: Claude knowledge"
+        - If from Gemini's training: Mark as "Source: Gemini knowledge"
         - If missing/not found: Mark as "Data not available" or provide range with "Estimated based on similar roles"
         - If low confidence: Add "Low confidence - limited data"
 
@@ -283,10 +138,10 @@ module AiAgents
 
         Structure your response to clearly separate:
         1. Verified data from searches
-        2. Claude's knowledge-based estimates
+        2. Gemini's knowledge-based estimates
         3. Missing data that couldn't be found
 
-        If searches fail or return no results, provide estimates but CLEARLY mark them as such.
+        If searches fail or return no results, provide estimates but CLEARLY mark them as such. DO NOT HALUCINATE.
       INSTRUCTIONS
     end
 
@@ -303,11 +158,44 @@ module AiAgents
           - Failed agents: #{failed.join(', ')}
           - Missing data points: #{missing.map { |m| m[:fields] }.flatten.join(', ')}
 
-          Please account for these gaps in your analysis and clearly indicate any assumptions made.
+          Please account for these gaps in your analysis and clearly indicate any assumptions made by explicitly stating them.
         CONTEXT
       else
         ""
       end
+    end
+
+    def output_format_instructions
+      <<~FORMAT
+        IMPORTANT: Respond with valid JSON in this exact format:
+
+        ```json
+        {
+          "summary": "This should be a comprehensive 4-6 sentence analysis that provides substantial context, explains the significance of findings, discusses implications, and sets up the key discoveries. It should give readers a thorough understanding of what was analyzed, why it matters, and what the overall conclusions indicate about the subject matter.",
+          "key_findings": [
+            "Specific, detailed finding 1 with concrete data points and context",
+            "Specific, detailed finding 2 with measurable outcomes or clear evidence",
+            "Specific, detailed finding 3 with quantitative or qualitative insights",
+            "Specific, detailed finding 4 with comparative analysis or trend identification",
+            "Specific, detailed finding 5 with actionable intelligence or critical insights"
+          ],
+          "specific_data": {
+            // Agent-specific structured data with detailed metrics,
+            // charts, tables, or other relevant analytical content
+            // This section should contain the most granular information
+          },
+          "confidence_level": "HIGH/MEDIUM/LOW with justification for the confidence rating",
+          "data_sources": "Complete list of specific URLs, documents, databases, or other sources used in the analysis. Only include public, human-readable URLs. Avoid redirect links from Google Vertex or internal APIs. Format each source with a title and a visible, verifiable URL",
+          "recommendations": [
+            "Specific, actionable recommendation 1: Do X by implementing Y strategy within Z timeframe, targeting specific metrics or outcomes",
+            "Specific, actionable recommendation 2: Take concrete action A to address finding B, with measurable success criteria and implementation steps",
+            "Specific, actionable recommendation 3: Implement specific solution C to optimize D, including resource requirements and expected ROI"
+          ]
+        }
+        ```
+
+        This JSON structure is CRITICAL for the final synthesis.
+      FORMAT
     end
   end
 end

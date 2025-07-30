@@ -1,170 +1,225 @@
+
+# module AiAgents
+#   class ImplementationFeasibility < BaseAgent
+#     def build_prompt
+#       <<~PROMPT
+#         <role>Implementation consultant and project manager with 12+ years delivering automation projects. Expert in change management, team capacity planning, and realistic timeline estimation. Known for identifying hidden obstacles before they become blockers.</role>
+
+#         <feasibility_context>
+#         Team Profile: #{@form_data['team_size']} #{@form_data['technical_expertise']} team
+#         Timeline Pressure: #{@form_data['timeline']}
+#         Process: #{@form_data['process_description']}
+#         Current Tools: #{@form_data['current_stack']}
+#         Constraints: #{@form_data['constraints']}
+#         Business Type: #{@form_data['business_type']}
+#         </feasibility_context>
+
+#         <constraint_analysis>
+#         Critical Constraints:
+#         #{constraint_evaluation}
+
+#         Team Capacity Reality:
+#         #{team_capacity_reality}
+
+#         Implementation Complexity:
+#         #{implementation_complexity}
+#         </constraint_analysis>
+
+#         <strategic_searches>
+#         Target 6-8 specific searches for feasibility validation:
+
+#         1. TEAM-SPECIFIC IMPLEMENTATION DATA:
+#            #{team_specific_searches}
+
+#         2. TIMELINE REALITY CHECKS:
+#            #{timeline_reality_searches}
+
+#         3. CONSTRAINT-SPECIFIC CHALLENGES:
+#            #{constraint_specific_searches}
+
+#         4. SUCCESS/FAILURE PATTERNS:
+#            #{pattern_analysis_searches}
+#         </strategic_searches>
+
+#         <output_requirements>
+#           Return exactly this JSON (no comments or extra lines):
+#           {
+#             "analysis": "A concise narrative explaining the most feasible implementation path, its confidence level; key timeline and team-fit considerations; constraint mitigations; and top risk factors with proposed solutions."
+#           }
+#         </output_requirements>
+
+#         <implementation_wisdom>
+#         - Factor in #{@form_data['timeline']} urgency vs quality tradeoffs
+#         - Consider #{@form_data['team_size']} team's bandwidth realistically
+#         - Address #{@form_data['constraints']} as implementation blockers
+#         - Validate timelines with real user experiences, not vendor promises
+#         </implementation_wisdom>
+#       PROMPT
+#     end
+
+#     private
+
+#     def constraint_evaluation
+#       constraints = @form_data['constraints'] || ""
+
+#       if constraints.downcase.include?('compliance')
+#         "Compliance requirements will add 2-4 weeks to any automation project"
+#       elsif constraints.downcase.include?('security')
+#         "Security review processes will extend timeline significantly"
+#       elsif constraints.downcase.include?('budget')
+#         "Budget constraints limit solution options and support levels"
+#       elsif constraints.empty?
+#         "No specific constraints mentioned - standard implementation approach"
+#       else
+#         "Custom constraints: #{constraints} - need specific research"
+#       end
+#     end
+
+#   def team_capacity_reality
+#       team_size = @form_data['team_size'] || '2-5'
+#       tech_level = @form_data['technical_expertise'] || 'basic'
+
+#       # Handle the complex condition first
+#       if ['2-5', '6-20'].include?(team_size) && tech_level == 'non-technical'
+#         return "No technical implementation capacity - vendor dependency required"
+#       end
+
+#       case [team_size, tech_level]
+#       when ['1', 'non-technical'], ['1', 'basic']
+#         "Severely limited - need fully managed solutions only"
+#       when ['2-5', 'basic'], ['6-20', 'basic']
+#         "Limited capacity - simple implementations only, extensive support needed"
+#       when [team_size, 'intermediate'], [team_size, 'advanced']
+#         "Sufficient technical capacity for moderate complexity implementations"
+#       else
+#         "Need detailed capacity assessment"
+#       end
+#     end
+
+#     def implementation_complexity
+#       if @form_data['timeline'] == 'asap' && @form_data['technical_expertise'] == 'non-technical'
+#         "HIGH RISK: Urgent timeline + non-technical team = recipe for failure"
+#       elsif @form_data['current_stack']&.split(',')&.length&.> 3
+#         "MODERATE: Complex stack integration required"
+#       else
+#         "STANDARD: Normal implementation complexity expected"
+#       end
+#     end
+
+#     def team_specific_searches
+#       '"' + @form_data['team_size'] + ' ' + @form_data['technical_expertise'] + ' team implement ' + @form_data['process_description'] + ' automation timeline"'
+#     end
+
+#     def timeline_reality_searches
+#       '"' + @form_data['process_description'] + ' automation implementation ' + @form_data['timeline'] + ' realistic timeline"'
+#     end
+
+#     def constraint_specific_searches
+#       if @form_data['constraints']&.length&.> 0
+#         '"' + @form_data['process_description'] + ' automation ' + @form_data['constraints'] + ' challenges"'
+#       else
+#         '"' + @form_data['process_description'] + ' automation implementation common problems"'
+#       end
+#     end
+
+#     def pattern_analysis_searches
+#       '"site:reddit.com ' + @form_data['process_description'] + ' automation failed implementation lessons"'
+#     end
+#   end
+# end
+
 module AiAgents
   class ImplementationFeasibility < BaseAgent
+    def token_limit
+      1000  # From our updated limits
+    end
+
     def build_prompt
       <<~PROMPT
-        <role>Implementation consultant and project manager with 12+ years delivering automation projects. Expert in change management, team capacity planning, and realistic timeline estimation. Known for identifying hidden obstacles before they become blockers.</role>
+        You are an implementation consultant specializing in realistic timeline estimation and team capacity assessment. You can only do web searches. *No hallucination* if any required context slot is blank, never invent.
 
-        <feasibility_context>
-        Team Profile: #{@form_data['team_size']} #{@form_data['technical_expertise']} team
-        Timeline Pressure: #{@form_data['timeline']}
-        Process: #{@form_data['process_description']}
-        Current Tools: #{@form_data['current_stack']}
-        Constraints: #{@form_data['constraints']}
-        Business Type: #{@form_data['business_type']}
-        </feasibility_context>
+        CONTEXT:
+        CONTEXT:
+        #{data_quality_instructions}
+        #{handle_previous_failures}
+        #{form_context}
 
-        <constraint_analysis>
-        Critical Constraints:
-        #{constraint_evaluation}
+        YOUR TASK:
+        Assess the feasibility of implementing #{@form_data['process_description']} automation with your team and constraints.
 
-        Team Capacity Reality:
-        #{team_capacity_reality}
+        SEARCH PRIORITY:
+        1. "#{build_team_search} implement #{@form_data['process_description']} automation timeline"
+        2. "#{@form_data['process_description']} automation implementation challenges #{@form_data['constraints']}"
+        3. "#{@form_data['timeline']} automation deployment realistic expectations"
 
-        Implementation Complexity:
-        #{implementation_complexity}
-        </constraint_analysis>
+        #{output_format_instructions}
 
-        <strategic_searches>
-        Target 6-8 specific searches for feasibility validation:
-
-        1. TEAM-SPECIFIC IMPLEMENTATION DATA:
-           #{team_specific_searches}
-
-        2. TIMELINE REALITY CHECKS:
-           #{timeline_reality_searches}
-
-        3. CONSTRAINT-SPECIFIC CHALLENGES:
-           #{constraint_specific_searches}
-
-        4. SUCCESS/FAILURE PATTERNS:
-           #{pattern_analysis_searches}
-        </strategic_searches>
-
-        <output_requirements>
+        SPECIFIC DATA STRUCTURE for "specific_data":
+        ```json
         {
-          "feasibilityRankings": [
-            {
-              "approach": "specific_implementation_path",
-              "score": float,
-              "confidence": "HIGH/MEDIUM/LOW",
-              "timelineRealistic": {
-                "kickoff": "X days - Source: [verified data]",
-                "productive": "X weeks - Source: [case studies]",
-                "optimized": "X months - Source: [experience reports]"
-              },
-              "teamFitAnalysis": {
-                "skillGaps": ["specific skills needed"],
-                "bandwidthReality": "hours/week required vs available",
-                "learningCurve": "estimated ramp time for #{@form_data['technical_expertise']} team"
-              },
-              "constraintHandling": {
-                "#{@form_data['constraints']}": "specific mitigation approach"
-              },
-              "riskFactors": [
-                {
-                  "risk": "specific implementation risk",
-                  "probability": "HIGH/MEDIUM/LOW",
-                  "impact": "specific consequence",
-                  "mitigation": "practical solution"
-                }
-              ]
+          "specific_data": {
+            "feasibility_score": "HIGH/MEDIUM/LOW",
+            "realistic_timeline": {
+              "setup_phase": "X weeks",
+              "training_phase": "X weeks",
+              "full_deployment": "X weeks",
+              "total_to_productive": "X weeks"
+            },
+            "team_capacity_assessment": {
+              "technical_fit": "HIGH/MEDIUM/LOW",
+              "bandwidth_available": "X hours/week",
+              "skill_gaps": ["List specific skills needed"],
+              "support_required": "MINIMAL/MODERATE/EXTENSIVE"
+            },
+            "implementation_complexity": {
+              "technical_difficulty": "LOW/MEDIUM/HIGH",
+              "change_management_effort": "LOW/MEDIUM/HIGH",
+              "integration_complexity": "LOW/MEDIUM/HIGH",
+              "overall_rating": "Simple/Moderate/Complex"
+            },
+            "constraint_analysis": {
+              "timeline_pressure": "Impact of #{@form_data['timeline']} deadline",
+              "budget_implications": "How budget affects implementation approach",
+              "technical_limitations": "Team technical capability gaps",
+              "other_constraints": "#{@form_data['constraints']} specific impacts"
+            },
+            "risk_factors": [
+              {
+                "risk": "Specific implementation risk",
+                "probability": "HIGH/MEDIUM/LOW",
+                "impact": "Description of potential impact",
+                "mitigation": "Practical solution approach"
+              }
+            ],
+            "success_probability": {
+              "percentage": "XX%",
+              "key_success_factors": ["Factor 1", "Factor 2"],
+              "potential_failure_points": ["Risk 1", "Risk 2"],
+              "recommended_approach": "Specific implementation strategy"
             }
-          ],
-          "implementationPath": {
-            "prerequisites": ["must-haves before starting"],
-            "phase1": "#{@form_data['timeline']} compatible first steps",
-            "successMetrics": ["how to measure progress"],
-            "escapeHatches": ["fallback options if it doesn't work"]
-          },
-          "reasoningChain": [/* implementation-focused reasoning */],
-          "realityCheck": {
-            "optimisticScenario": "best case timeline and effort",
-            "realisticScenario": "probable timeline and effort",
-            "pessimisticScenario": "worst case timeline and effort",
-            "recommendation": "which scenario to plan for"
           }
         }
-        </output_requirements>
+        ```
 
-        <implementation_wisdom>
-        - Factor in #{@form_data['timeline']} urgency vs quality tradeoffs
-        - Consider #{@form_data['team_size']} team's bandwidth realistically
-        - Address #{@form_data['constraints']} as implementation blockers
-        - Validate timelines with real user experiences, not vendor promises
-        </implementation_wisdom>
+        CRITICAL CONSIDERATIONS:
+        - Team size: #{@form_data['team_size']} with #{@form_data['technical_expertise']} expertise
+        - Timeline pressure: #{@form_data['timeline']}
+        - Current constraints: #{@form_data['constraints']}
+        - Be realistic about timelines - factor in learning curves and unforeseen issues
+        - Consider change management effort for team adoption
       PROMPT
     end
 
     private
 
-    def constraint_evaluation
-      constraints = @form_data['constraints'] || ""
-
-      if constraints.downcase.include?('compliance')
-        "Compliance requirements will add 2-4 weeks to any automation project"
-      elsif constraints.downcase.include?('security')
-        "Security review processes will extend timeline significantly"
-      elsif constraints.downcase.include?('budget')
-        "Budget constraints limit solution options and support levels"
-      elsif constraints.empty?
-        "No specific constraints mentioned - standard implementation approach"
-      else
-        "Custom constraints: #{constraints} - need specific research"
-      end
-    end
-
-  def team_capacity_reality
-      team_size = @form_data['team_size'] || '2-5'
-      tech_level = @form_data['technical_expertise'] || 'basic'
-
-      # Handle the complex condition first
-      if ['2-5', '6-20'].include?(team_size) && tech_level == 'non-technical'
-        return "No technical implementation capacity - vendor dependency required"
-      end
-
-      case [team_size, tech_level]
-      when ['1', 'non-technical'], ['1', 'basic']
-        "Severely limited - need fully managed solutions only"
-      when ['2-5', 'basic'], ['6-20', 'basic']
-        "Limited capacity - simple implementations only, extensive support needed"
-      when [team_size, 'intermediate'], [team_size, 'advanced']
-        "Sufficient technical capacity for moderate complexity implementations"
-      else
-        "Need detailed capacity assessment"
-      end
-    end
-
-    def implementation_complexity
-      if @form_data['timeline'] == 'asap' && @form_data['technical_expertise'] == 'non-technical'
-        "HIGH RISK: Urgent timeline + non-technical team = recipe for failure"
-      elsif @form_data['current_stack']&.split(',')&.length&.> 3
-        "MODERATE: Complex stack integration required"
-      else
-        "STANDARD: Normal implementation complexity expected"
-      end
-    end
-
-    def team_specific_searches
-      '"' + @form_data['team_size'] + ' ' + @form_data['technical_expertise'] + ' team implement ' + @form_data['process_description'] + ' automation timeline"'
-    end
-
-    def timeline_reality_searches
-      '"' + @form_data['process_description'] + ' automation implementation ' + @form_data['timeline'] + ' realistic timeline"'
-    end
-
-    def constraint_specific_searches
-      if @form_data['constraints']&.length&.> 0
-        '"' + @form_data['process_description'] + ' automation ' + @form_data['constraints'] + ' challenges"'
-      else
-        '"' + @form_data['process_description'] + ' automation implementation common problems"'
-      end
-    end
-
-    def pattern_analysis_searches
-      '"site:reddit.com ' + @form_data['process_description'] + ' automation failed implementation lessons"'
+    def build_team_search
+      "#{@form_data['team_size']} #{@form_data['technical_expertise']} team"
     end
   end
 end
+
+
+
 
 # module AiAgents
 #   class ImplementationFeasibility < BaseAgent

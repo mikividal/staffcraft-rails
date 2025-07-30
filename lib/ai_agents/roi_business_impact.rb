@@ -1,148 +1,212 @@
 module AiAgents
   class RoiBusinessImpact < BaseAgent
+    def token_limit
+      3000  # From our updated limits
+    end
+
     def build_prompt
       <<~PROMPT
-        <role>Senior financial analyst and business case developer with CPA background. Expert in automation ROI modeling, cost-benefit analysis, and business impact measurement. Known for conservative, realistic projections that CFOs trust.</role>
+        You are a senior financial analyst specializing in automation ROI and business case development. You can only do web searches. *No hallucination* if any required context slot is blank, never invent.
 
-        <financial_context>
-        Current Process: #{@form_data['process_description']}
-        Business Scale: #{@form_data['business_type']} with #{@form_data['team_size']} team
-        Budget Constraint: #{@form_data['budget_range']}
-        Timeline Value: #{@form_data['timeline']}
-        Role Economics: #{@form_data['role_type']} (#{@form_data['experience_level']})
-        Market: #{@form_data['country']}
-        </financial_context>
+        CONTEXT:
+        CONTEXT:
+        #{data_quality_instructions}
+        #{handle_previous_failures}
+        #{form_context}
 
-        <roi_methodology>
-        Calculate ROI using verified market data:
+        YOUR TASK:
+        Calculate realistic ROI for automating #{@form_data['process_description']} vs hiring a #{@form_data['role_type']}.
 
-        Baseline Costs: #{baseline_cost_factors}
-        Opportunity Cost: #{opportunity_cost_analysis}
-        Implementation Investment: #{implementation_investment_factors}
-        Ongoing Operational: #{operational_cost_factors}
-        </roi_methodology>
+        SEARCH PRIORITY:
+        1. "#{@form_data['role_type']} total employment cost #{@form_data['country']} benefits taxes 2025"
+        2. "#{@form_data['process_description']} automation ROI case study #{@form_data['business_type']}"
+        3. "automation vs hiring payback period #{@form_data['budget_range']} budget"
 
-        <financial_searches>
-        Target 6-8 searches for ROI validation (prioritize verified financial data):
+        #{output_format_instructions}
 
-        1. VERIFIED BASELINE COSTS:
-           #{baseline_cost_searches}
-
-        2. IMPLEMENTATION INVESTMENTS:
-           #{implementation_cost_searches}
-
-        3. OPERATIONAL SAVINGS:
-           #{operational_savings_searches}
-
-        4. ROI CASE STUDIES:
-           #{roi_validation_searches}
-        </financial_searches>
-
-        <output_requirements>
+        SPECIFIC DATA STRUCTURE for "specific_data":
+        ```json
         {
-          "roiRankings": [
-            {
-              "option": "specific_financial_option",
-              "score": float,
-              "confidence": "HIGH/MEDIUM/LOW",
-              "financialProjection": {
-                "year1": {
-                  "investment": "$X,XXX - Source: [verified data]",
-                  "savings": "$X,XXX - Source: [case studies]",
-                  "netROI": "XX% - Calculated",
-                  "paybackMonths": "X months - Based on cashflow model"
-                },
-                "year2": {
-                  "ongoingCosts": "$X,XXX - Source: [operational data]",
-                  "cumulativeSavings": "$X,XXX - Projected",
-                  "totalROI": "XX% - Cumulative"
-                }
+          "specific_data": {
+            "recommended_option": {
+              "option": "automation/hiring/outsourcing",
+              "roi_percentage": "XX%",
+              "payback_months": "X months",
+              "confidence_level": "HIGH/MEDIUM/LOW"
+            },
+            "financial_comparison": {
+              "hiring_option": {
+                "first_year_cost": "$XX,XXX",
+                "monthly_ongoing": "$X,XXX",
+                "hidden_costs": "$X,XXX (recruiting, benefits, taxes)"
               },
-              "businessImpact": {
-                "efficiencyGains": "XX% improvement - Source: [benchmarks]",
-                "qualityImprovements": "measurable quality metrics",
-                "scalabilityFactor": "growth capacity multiplier",
-                "riskReduction": "operational risk mitigation value"
+              "automation_option": {
+                "initial_investment": "$X,XXX",
+                "monthly_ongoing": "$XXX",
+                "total_first_year": "$X,XXX"
               },
-              "sensitivityAnalysis": {
-                "bestCase": "optimistic scenario ROI",
-                "realistic": "probable scenario ROI",
-                "worstCase": "conservative scenario ROI",
-                "breakEvenPoint": "minimum performance required"
+              "net_savings": {
+                "year_1": "$X,XXX saved vs hiring",
+                "year_2": "$XX,XXX cumulative savings",
+                "break_even_point": "Month X"
               }
+            },
+            "business_impact": {
+              "efficiency_gains": "XX% process improvement",
+              "capacity_increase": "X tasks/hour vs current",
+              "quality_improvement": "XX% error reduction",
+              "scalability_factor": "Can handle X% more volume without additional cost"
+            },
+            "risk_analysis": {
+              "implementation_risk": "LOW/MEDIUM/HIGH",
+              "adoption_risk": "LOW/MEDIUM/HIGH",
+              "technology_risk": "LOW/MEDIUM/HIGH",
+              "financial_risk_mitigation": "Specific strategies to reduce financial risk"
+            },
+            "scenario_analysis": {
+              "best_case": {
+                "roi": "XXX%",
+                "payback": "X months",
+                "assumptions": "Perfect implementation, immediate adoption"
+              },
+              "realistic": {
+                "roi": "XX%",
+                "payback": "X months",
+                "assumptions": "Normal implementation curve, minor delays"
+              },
+              "worst_case": {
+                "roi": "X%",
+                "payback": "XX months",
+                "assumptions": "Implementation challenges, slow adoption"
+              }
+            },
+            "opportunity_cost": {
+              "delay_cost": "Cost of waiting X months",
+              "status_quo_risk": "Cost of doing nothing",
+              "competitive_impact": "Market positioning effect"
             }
-          ],
-          "opportunityCostAnalysis": {
-            "delayingDecision": "cost of #{@form_data['timeline']} delay",
-            "statusQuoRisk": "cost of doing nothing",
-            "competitiveDisadvantage": "market positioning impact"
-          },
-          "reasoningChain": [/* financial reasoning steps */],
-          "businessCase": {
-            "executiveSummary": "CFO-ready ROI summary",
-            "keyAssumptions": ["critical assumptions in financial model"],
-            "riskFactors": ["financial risks and mitigations"],
-            "recommendedAction": "specific next step with financial rationale"
           }
         }
-        </output_requirements>
+        ```
 
-        <financial_rigor>
-        - Use only verified salary and cost data with sources
-        - Include all hidden costs (training, integration, maintenance)
-        - Apply conservative assumptions for projections
-        - Factor in #{@form_data['timeline']} urgency costs
-        - Consider #{@form_data['budget_range']} budget constraints in all scenarios
-        </financial_rigor>
+        CRITICAL FINANCIAL REQUIREMENTS:
+        - Use realistic, conservative projections
+        - Include ALL costs (setup, training, maintenance, management time)
+        - Factor in team's #{@form_data['technical_expertise']} level for adoption speed
+        - Consider #{@form_data['timeline']} urgency in calculations
+        - Account for #{@form_data['budget_range']} budget constraints
+        - Provide specific dollar amounts with sources
       PROMPT
-    end
-
-    private
-
-    def baseline_cost_factors
-      if @form_data['timeline'] == 'asap'
-        "Premium hiring costs, opportunity cost of delays, current inefficiency costs"
-      else
-        "Standard hiring costs, normal opportunity costs, current process costs"
-      end
-    end
-
-    def opportunity_cost_analysis
-      "Cost of #{@form_data['timeline']} delay in solving #{@form_data['process_description']} inefficiencies"
-    end
-
-    def implementation_investment_factors
-      case @form_data['technical_expertise']
-      when 'non-technical'
-        "High vendor dependency costs, extensive training needs, ongoing support costs"
-      when 'advanced'
-        "Lower implementation costs, self-sufficiency benefits, faster deployment"
-      else
-        "Moderate implementation costs, mixed support needs"
-      end
-    end
-
-    def operational_cost_factors
-      "Ongoing licensing, maintenance, support, and scaling costs for #{@form_data['business_type']} context"
-    end
-
-    def baseline_cost_searches
-      '"' + @form_data['role_type'] + ' total cost employment ' + @form_data['country'] + ' benefits taxes 2025"'
-    end
-
-    def implementation_cost_searches
-      '"' + @form_data['process_description'] + ' automation implementation cost ' + @form_data['technical_expertise'] + ' team"'
-    end
-
-    def operational_savings_searches
-      '"' + @form_data['process_description'] + ' automation ROI case study ' + @form_data['business_type'] + '"'
-    end
-
-    def roi_validation_searches
-      '"site:reddit.com ' + @form_data['process_description'] + ' automation payback period real experience"'
     end
   end
 end
+
+# module AiAgents
+#   class RoiBusinessImpact < BaseAgent
+#     def build_prompt
+#       <<~PROMPT
+#         <role>Senior financial analyst and business case developer with CPA background. Expert in automation ROI modeling, cost-benefit analysis, and business impact measurement. Known for conservative, realistic projections that CFOs trust.</role>
+
+#         <financial_context>
+#         Current Process: #{@form_data['process_description']}
+#         Business Scale: #{@form_data['business_type']} with #{@form_data['team_size']} team
+#         Budget Constraint: #{@form_data['budget_range']}
+#         Timeline Value: #{@form_data['timeline']}
+#         Role Economics: #{@form_data['role_type']} (#{@form_data['experience_level']})
+#         Market: #{@form_data['country']}
+#         </financial_context>
+
+#         <roi_methodology>
+#         Calculate ROI using verified market data:
+
+#         Baseline Costs: #{baseline_cost_factors}
+#         Opportunity Cost: #{opportunity_cost_analysis}
+#         Implementation Investment: #{implementation_investment_factors}
+#         Ongoing Operational: #{operational_cost_factors}
+#         </roi_methodology>
+
+#         <financial_searches>
+#         Target 6-8 searches for ROI validation (prioritize verified financial data):
+
+#         1. VERIFIED BASELINE COSTS:
+#            #{baseline_cost_searches}
+
+#         2. IMPLEMENTATION INVESTMENTS:
+#            #{implementation_cost_searches}
+
+#         3. OPERATIONAL SAVINGS:
+#            #{operational_savings_searches}
+
+#         4. ROI CASE STUDIES:
+#            #{roi_validation_searches}
+#         </financial_searches>
+
+#         <output_requirements>
+#           Return exactly this JSON (no comments or extra lines):
+#           {
+#             "analysis": "A brief narrative summarizing the top ROI option with its score and confidence; key financial projections (investment, savings, payback); opportunity cost insights; and recommended next steps with assumptions."
+#           }
+#         </output_requirements>
+
+#         <financial_rigor>
+#         - Use only verified salary and cost data with sources
+#         - Include all hidden costs (training, integration, maintenance)
+#         - Apply conservative assumptions for projections
+#         - Factor in #{@form_data['timeline']} urgency costs
+#         - Consider #{@form_data['budget_range']} budget constraints in all scenarios
+#         </financial_rigor>
+#       PROMPT
+#     end
+
+#     private
+
+#     def baseline_cost_factors
+#       if @form_data['timeline'] == 'asap'
+#         "Premium hiring costs, opportunity cost of delays, current inefficiency costs"
+#       else
+#         "Standard hiring costs, normal opportunity costs, current process costs"
+#       end
+#     end
+
+#     def opportunity_cost_analysis
+#       "Cost of #{@form_data['timeline']} delay in solving #{@form_data['process_description']} inefficiencies"
+#     end
+
+#     def implementation_investment_factors
+#       case @form_data['technical_expertise']
+#       when 'non-technical'
+#         "High vendor dependency costs, extensive training needs, ongoing support costs"
+#       when 'advanced'
+#         "Lower implementation costs, self-sufficiency benefits, faster deployment"
+#       else
+#         "Moderate implementation costs, mixed support needs"
+#       end
+#     end
+
+#     def operational_cost_factors
+#       "Ongoing licensing, maintenance, support, and scaling costs for #{@form_data['business_type']} context"
+#     end
+
+#     def baseline_cost_searches
+#       '"' + @form_data['role_type'] + ' total cost employment ' + @form_data['country'] + ' benefits taxes 2025"'
+#     end
+
+#     def implementation_cost_searches
+#       '"' + @form_data['process_description'] + ' automation implementation cost ' + @form_data['technical_expertise'] + ' team"'
+#     end
+
+#     def operational_savings_searches
+#       '"' + @form_data['process_description'] + ' automation ROI case study ' + @form_data['business_type'] + '"'
+#     end
+
+#     def roi_validation_searches
+#       '"site:reddit.com ' + @form_data['process_description'] + ' automation payback period real experience"'
+#     end
+#   end
+# end
+
+
+
 
 # module AiAgents
 #   class RoiBusinessImpact < BaseAgent

@@ -3,165 +3,280 @@ module AiAgents
     def initialize(form_data, parallel_results)
       super(form_data)
       @results = parallel_results
-      @data_quality = parallel_results['Data Quality Summary'] || {}
       @critic_validation = parallel_results['Critic Validation'] || {}
+    end
+
+    def token_limit
+      2000  # From our updated limits
     end
 
     def build_prompt
       <<~PROMPT
-        <role>Senior strategy partner and executive advisor with 25+ years guiding C-level decisions. Expert in synthesizing complex analyses into actionable strategies. Known for practical recommendations that account for real-world implementation challenges and organizational constraints.</role>
+        You are a senior strategy partner creating the final strategy for a critical business decision.
 
-        <synthesis_context>
-        Strategic Decision: #{@form_data['business_type']} company needs strategic approach for #{@form_data['process_description']}
-        Business Context: #{@form_data['team_size']} team, #{@form_data['budget_range']} budget, #{@form_data['timeline']} timeline
-        Technical Reality: #{@form_data['technical_expertise']} team with #{@form_data['current_stack']} stack
-        Critical Constraints: #{@form_data['constraints']}
-        </synthesis_context>
+        BUSINESS CONTEXT:
+        #{form_context}
 
-        <available_intelligence>
-        Market Analysis: #{summarize_agent_output('Market & Salary Intelligence')}
-        Technology Assessment: #{summarize_agent_output('Technology & Tools Performance')}
-        Implementation Analysis: #{summarize_agent_output('Implementation Feasibility')}
-        Financial Modeling: #{summarize_agent_output('ROI & Business Impact')}
-        Risk Assessment: #{summarize_agent_output('Risk & Compliance Analysis')}
+        SPECIALIST ANALYSES TO SYNTHESIZE:
+        #{format_all_agent_results}
 
-        Critical Review: #{@critic_validation}
-        Data Quality: #{@data_quality}
-        </available_intelligence>
+        CRITICAL VALIDATION:
+        #{format_critic_feedback}
 
-        <strategic_synthesis_process>
-        1. INTEGRATE PERSPECTIVES: Synthesize insights across all domains
-        2. RESOLVE CONTRADICTIONS: Address conflicting recommendations using critic insights
-        3. WEIGHT BY CONFIDENCE: Prioritize high-confidence findings
-        4. CONTEXTUALIZE: Ensure recommendations fit specific business context
-        5. SEQUENCE ACTIONS: Create practical implementation roadmap
-        </strategic_synthesis_process>
+        YOUR SYNTHESIS TASK:
+        Integrate all analyses into a final strategic recommendation that creates a clear, actionable strategy for the decision-maker.
 
-        <targeted_validation_searches>
-        Execute 4-6 strategic searches to validate synthesis:
+        SEARCH PRIORITY:
+        1. "#{@form_data['business_type']} #{@form_data['process_description']} automation vs hiring strategy case study"
+        2. "hybrid automation outsourcing #{@form_data['business_type']} implementation experience"
+        3. "#{@form_data['team_size']} #{@form_data['technical_expertise']} team automation success factors"
 
-        1. STRATEGIC PRECEDENT:
-           "#{@form_data['business_type']} #{@form_data['process_description']} automation vs hiring strategy case study"
+        #{output_format_instructions}
 
-        2. INTEGRATED APPROACH VALIDATION:
-           "hybrid automation outsourcing #{@form_data['business_type']} implementation experience"
-
-        3. CONTEXT-SPECIFIC SUCCESS PATTERNS:
-           "#{@form_data['team_size']} #{@form_data['technical_expertise']} team automation strategy #{@form_data['timeline']}"
-
-        4. EXECUTIVE DECISION FRAMEWORKS:
-           "#{@form_data['business_type']} automation vs hiring decision framework ROI"
-        </targeted_validation_searches>
-
-        <output_requirements>
+        SPECIFIC DATA STRUCTURE for "specific_data":
+        ```json
         {
-          "executiveSummary": {
-            "situation": "concise problem statement with business impact",
-            "recommendation": "clear strategic recommendation with rationale",
-            "confidence": "HIGH/MEDIUM/LOW with explicit reasoning",
-            "dataQuality": "assessment of analysis reliability",
-            "decisionUrgency": "timing implications for #{@form_data['timeline']} constraint"
-          },
-          "strategicOptions": [
-            {
-              "rank": 1,
-              "strategy": "specific strategic approach name",
-              "compositeScore": float,
-              "scoreBreakdown": {
-                "market": "score from market analysis",
-                "technology": "score from tech analysis",
-                "feasibility": "score from implementation analysis",
-                "roi": "score from financial analysis",
-                "risk": "score from risk analysis"
+          "specific_data": {
+            "final_recommendation": {
+              "top_strategy": "which i the best strategy",
+              "confidence_level": "HIGH/MEDIUM/LOW",
+              "rationale": "Why this strategy wins for your specific situation"
+            },
+            "scorecard_comparison": [
+              {
+                "option": "strategy",
+                "overall_score": "X/10",
+                "pros": ["Key advantage 1", "Key advantage 2"],
+                "cons": ["Key limitation 1", "Key limitation 2"],
+                "best_for": "What situations this works best"
               },
-              "confidenceLevel": "HIGH/MEDIUM/LOW - based on data quality and critic review",
-              "strategicRationale": "why this is the best approach for this specific context",
-              "implementationSequence": [
-                {
-                  "phase": "phase name",
-                  "timeline": "realistic timeline",
-                  "actions": ["specific actions to take"],
-                  "success metrics": ["how to measure progress"],
-                  "decision points": ["key decisions needed"]
-                }
-              ],
-              "riskMitigation": ["key risks and mitigation strategies"],
-              "resourceRequirements": {
-                "budget": "realistic budget requirements",
-                "team": "team involvement and skills needed",
-                "time": "time investment required"
+              {
+                "option": "strategy",
+                "overall_score": "6.2/10",
+                "pros": ["Key advantage 1", "Key advantage 2"],
+                "cons": ["Key limitation 1", "Key limitation 2"],
+                "best_for": "What situations this works best"
               }
+            ],
+            "implementation_roadmap": {
+              "phase_1": {
+                "timeline": "Weeks 1-4",
+                "actions": ["Specific action 1", "Specific action 2"],
+                "budget": "$X,XXX",
+                "success_metrics": "How to measure progress"
+              },
+              "phase_2": {
+                "timeline": "Months 2-6",
+                "actions": ["Specific action 1", "Specific action 2"],
+                "budget": "$X,XXX",
+                "success_metrics": "How to measure progress"
+              }
+            },
+            "critical_success_factors": [
+              "Non-negotiable requirement 1",
+              "Key success driver 2",
+              "Essential preparation 3"
+            ],
+            "key_risks_and_mitigations": [
+              {
+                "risk": "Specific risk from analysis",
+                "likelihood": "HIGH/MEDIUM/LOW",
+                "mitigation": "Practical prevention strategy"
+              }
+            ],
+            "financial_summary": {
+              "recommended_option_cost": {
+                "first_year": "$XX,XXX total investment",
+                "monthly_ongoing": "$X,XXX after setup",
+                "roi_timeline": "X months to break even"
+              },
+              "vs_alternatives": {
+                "savings_vs_hiring": "$XX,XXX first year",
+                "cost_advantage": "XX% lower ongoing costs"
+              }
+            },
+            "decision_confidence": {
+              "data_quality": "HIGH/MEDIUM/LOW - Based on source reliability",
+              "analysis_gaps": ["What we couldn't verify", "Areas needing more data"],
+              "critic_validation_result": "PASS/CONDITIONAL/FAIL",
+              "recommendation_strength": "How confident you should be in this decision"
+            },
+            "immediate_next_steps": [
+              {
+                "action": "Specific first step",
+                "timeline": "By when",
+                "owner": "Who should do this",
+                "budget": "$XXX if applicable"
+              }
+            ],
+            "contingency_plans": {
+              "if_budget_reduced": "Alternative approach for lower budget",
+              "if_timeline_extended": "Better approach with more time",
+              "if_tech_issues": "Backup plan if primary solution fails"
             }
-          ],
-          "criticalSuccess Factors": {
-            "mustHaves": ["non-negotiable requirements for success"],
-            "successDrivers": ["factors that increase probability of success"],
-            "failurePatterns": ["common reasons this approach fails"],
-            "keyDecisions": ["critical decisions that will determine outcome"]
-          },
-          "reasoningChain": [
-            {
-              "step": 1,
-              "synthesis": "how different analyses were integrated",
-              "source": "which agent insights were most influential",
-              "result": "resulting strategic insight",
-              "confidence": "confidence in this synthesis step"
-            }
-          ],
-          "implementationGuidance": {
-            "immediate": ["actions to take in next 2 weeks"],
-            "shortTerm": ["actions for next 1-3 months"],
-            "longTerm": ["strategic moves for 6+ months"],
-            "contingencies": ["backup plans if primary strategy encounters issues"]
-          },
-          "executiveDecision": {
-            "recommendedAction": "specific next step for decision maker",
-            "decisionCriteria": "how to evaluate if this is working",
-            "pivotPoints": "when and how to change course if needed",
-            "investmentJustification": "business case for this investment"
           }
         }
-        </output_requirements>
+        ```
 
-        <strategic_excellence>
-        - Synthesize insights rather than just summarizing agent outputs
-        - Address critic concerns explicitly in recommendations
-        - Ensure strategy fits #{@form_data['timeline']} urgency and #{@form_data['budget_range']} constraints
-        - Provide actionable next steps, not just high-level strategy
-        - Account for #{@form_data['technical_expertise']} team capabilities in implementation plan
-        - Create realistic timelines based on actual data, not optimistic projections
-        </strategic_excellence>
+        SYNTHESIS REQUIREMENTS:
+        - Weight recommendations by data quality and critic validation
+        - Address any contradictions between agents explicitly
+        - Ensure strategy fits #{@form_data['timeline']} urgency and #{@form_data['budget_range']} budget
+        - Account for #{@form_data['technical_expertise']} team capabilities
+        - Create actionable, specific next steps
+        - Provide clear success metrics and decision points
+        - Include realistic financial projections
+        - Address critic concerns directly in final recommendation
       PROMPT
     end
 
     private
 
-    def summarize_agent_output(agent_name)
-      result = @results[agent_name]
-      return "Not available" unless result&.dig(:output)
+    def format_all_agent_results
+      summary = ""
+      @results.each do |agent_name, result|
+        next if agent_name.include?('Validation') || agent_name.include?('Quality')
 
-      output = result[:output]
-      confidence = result.dig(:data_quality, :confidence) || 'unknown'
-
-      "Top recommendation with #{confidence} confidence: #{extract_key_insight(output)}"
+        summary += "\n=== #{agent_name} ===\n"
+        summary += extract_agent_summary(result)
+        summary += "\n"
+      end
+      summary
     end
 
-    def extract_key_insight(output)
-      return "No data" unless output.is_a?(Hash)
+    def extract_agent_summary(result)
+      if result[:agent_output].is_a?(Hash)
+        analysis = result[:agent_output][:analysis] ||
+                  result[:agent_output]['analysis'] ||
+                  result[:agent_output][:summary]
 
-      # Try to extract the top-ranked option from various possible structures
-      rankings = output.values.first
-      if rankings.is_a?(Array) && rankings.any?
-        top_option = rankings.first
-        option_name = top_option['option'] || top_option['solution'] || top_option['approach'] || 'Unknown option'
-        score = top_option['score'] || 'No score'
-        "#{option_name} (#{score}/10)"
-      else
-        "Analysis completed but structure unclear"
+        if analysis.is_a?(String)
+          # Get first 150 characters for synthesis
+          return analysis.strip.first(150) + (analysis.length > 150 ? "..." : "")
+        end
       end
+      'Analysis completed'
+    end
+
+    def format_critic_feedback
+      if @critic_validation.is_a?(Hash)
+        analysis = @critic_validation[:analysis] ||
+                  @critic_validation['analysis'] ||
+                  @critic_validation[:agent_output]&.dig(:analysis)
+
+        if analysis.is_a?(String)
+          return "CRITIC VALIDATION: #{analysis}"
+        end
+      end
+
+      'No critic feedback available'
     end
   end
 end
+
+
+# module AiAgents
+#   class StrategicSynthesizer < BaseAgent
+#     def initialize(form_data, parallel_results)
+#       super(form_data)
+#       @results = parallel_results
+#       @data_quality = parallel_results['Data Quality Summary'] || {}
+#       @critic_validation = parallel_results['Critic Validation'] || {}
+#     end
+
+#     def build_prompt
+#       <<~PROMPT
+#         <role>Senior strategy partner and executive advisor with 25+ years guiding C-level decisions. Expert in synthesizing complex analyses into actionable strategies. Known for practical recommendations that account for real-world implementation challenges and organizational constraints.</role>
+
+#         <synthesis_context>
+#         Strategic Decision: #{@form_data['business_type']} company needs strategic approach for #{@form_data['process_description']}
+#         Business Context: #{@form_data['team_size']} team, #{@form_data['budget_range']} budget, #{@form_data['timeline']} timeline
+#         Technical Reality: #{@form_data['technical_expertise']} team with #{@form_data['current_stack']} stack
+#         Critical Constraints: #{@form_data['constraints']}
+#         </synthesis_context>
+
+#         <available_intelligence>
+#         Market Analysis: #{summarize_agent_output('Market & Salary Intelligence')}
+#         Technology Assessment: #{summarize_agent_output('Technology & Tools Performance')}
+#         Implementation Analysis: #{summarize_agent_output('Implementation Feasibility')}
+#         Financial Modeling: #{summarize_agent_output('ROI & Business Impact')}
+#         Risk Assessment: #{summarize_agent_output('Risk & Compliance Analysis')}
+
+#         Critical Review: #{@critic_validation}
+#         Data Quality: #{@data_quality}
+#         </available_intelligence>
+
+#         <strategic_synthesis_process>
+#         1. INTEGRATE PERSPECTIVES: Synthesize insights across all domains
+#         2. RESOLVE CONTRADICTIONS: Address conflicting recommendations using critic insights
+#         3. WEIGHT BY CONFIDENCE: Prioritize high-confidence findings
+#         4. CONTEXTUALIZE: Ensure recommendations fit specific business context
+#         5. SEQUENCE ACTIONS: Create practical implementation roadmap
+#         </strategic_synthesis_process>
+
+#         <targeted_validation_searches>
+#         Execute 4-6 strategic searches to validate synthesis:
+
+#         1. STRATEGIC PRECEDENT:
+#            "#{@form_data['business_type']} #{@form_data['process_description']} automation vs hiring strategy case study"
+
+#         2. INTEGRATED APPROACH VALIDATION:
+#            "hybrid automation outsourcing #{@form_data['business_type']} implementation experience"
+
+#         3. CONTEXT-SPECIFIC SUCCESS PATTERNS:
+#            "#{@form_data['team_size']} #{@form_data['technical_expertise']} team automation strategy #{@form_data['timeline']}"
+
+#         4. EXECUTIVE DECISION FRAMEWORKS:
+#            "#{@form_data['business_type']} automation vs hiring decision framework ROI"
+#         </targeted_validation_searches>
+
+#         <output_requirements>
+#           Return exactly this JSON (no comments or extra lines):
+#           {
+#             "analysis": "An executive summary of the situation, clear strategic recommendation with rationale, confidence level, and next-step guidance tied to your timeline and constraints."
+#           }
+#         </output_requirements>
+
+#         <strategic_excellence>
+#         - Synthesize insights rather than just summarizing agent outputs
+#         - Address critic concerns explicitly in recommendations
+#         - Ensure strategy fits #{@form_data['timeline']} urgency and #{@form_data['budget_range']} constraints
+#         - Provide actionable next steps, not just high-level strategy
+#         - Account for #{@form_data['technical_expertise']} team capabilities in implementation plan
+#         - Create realistic timelines based on actual data, not optimistic projections
+#         </strategic_excellence>
+#       PROMPT
+#     end
+
+#     private
+
+#     def summarize_agent_output(agent_name)
+#       result = @results[agent_name]
+#       return "Not available" unless result&.dig(:output)
+
+#       output = result[:output]
+#       confidence = result.dig(:data_quality, :confidence) || 'unknown'
+
+#       "Top recommendation with #{confidence} confidence: #{extract_key_insight(output)}"
+#     end
+
+#     def extract_key_insight(output)
+#       return "No data" unless output.is_a?(Hash)
+
+#       # Try to extract the top-ranked option from various possible structures
+#       rankings = output.values.first
+#       if rankings.is_a?(Array) && rankings.any?
+#         top_option = rankings.first
+#         option_name = top_option['option'] || top_option['solution'] || top_option['approach'] || 'Unknown option'
+#         score = top_option['score'] || 'No score'
+#         "#{option_name} (#{score}/10)"
+#       else
+#         "Analysis completed but structure unclear"
+#       end
+#     end
+#   end
+# end
+
 # module AiAgents
 #   class StrategicSynthesizer < BaseAgent
 #     def initialize(form_data, parallel_results)

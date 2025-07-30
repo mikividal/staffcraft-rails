@@ -1,110 +1,110 @@
-.critic-review-container {
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-  border: 2px solid #f59e0b;
-  border-radius: var(--border-radius);
-  padding: 2rem;
-  margin: 2rem 0;
+// .critic-review-container {
+//   background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+//   border: 2px solid #f59e0b;
+//   border-radius: var(--border-radius);
+//   padding: 2rem;
+//   margin: 2rem 0;
 
-  .critic-header {
-    display: flex;
-    align-items: center;
-    margin-bottom: 1.5rem;
+//   .critic-header {
+//     display: flex;
+//     align-items: center;
+//     margin-bottom: 1.5rem;
 
-    .critic-icon {
-      font-size: 2rem;
-      margin-right: 1rem;
-    }
+//     .critic-icon {
+//       font-size: 2rem;
+//       margin-right: 1rem;
+//     }
 
-    h3 {
-      margin: 0;
-      color: #92400e;
-    }
-  }
+//     h3 {
+//       margin: 0;
+//       color: #92400e;
+//     }
+//   }
 
-  .validation-status {
-    display: inline-block;
-    padding: 0.5rem 1.5rem;
-    border-radius: 25px;
-    font-weight: 700;
-    margin-bottom: 1.5rem;
+//   .validation-status {
+//     display: inline-block;
+//     padding: 0.5rem 1.5rem;
+//     border-radius: 25px;
+//     font-weight: 700;
+//     margin-bottom: 1.5rem;
 
-    &.pass {
-      background: #10b981;
-      color: white;
-    }
+//     &.pass {
+//       background: #10b981;
+//       color: white;
+//     }
 
-    &.conditional {
-      background: #f59e0b;
-      color: white;
-    }
+//     &.conditional {
+//       background: #f59e0b;
+//       color: white;
+//     }
 
-    &.fail {
-      background: #ef4444;
-      color: white;
-    }
-  }
+//     &.fail {
+//       background: #ef4444;
+//       color: white;
+//     }
+//   }
 
-  .critic-section {
-    background: white;
-    border-radius: calc(var(--border-radius) / 2);
-    padding: 1.5rem;
-    margin-bottom: 1rem;
+//   .critic-section {
+//     background: white;
+//     border-radius: calc(var(--border-radius) / 2);
+//     padding: 1.5rem;
+//     margin-bottom: 1rem;
 
-    h5 {
-      color: #92400e;
-      margin-bottom: 1rem;
-      font-size: 1.1rem;
-    }
+//     h5 {
+//       color: #92400e;
+//       margin-bottom: 1rem;
+//       font-size: 1.1rem;
+//     }
 
-    .issue-item {
-      background: #fef3c7;
-      border-left: 4px solid #f59e0b;
-      padding: 1rem;
-      margin-bottom: 0.75rem;
-      border-radius: 0 calc(var(--border-radius) / 2) calc(var(--border-radius) / 2) 0;
+//     .issue-item {
+//       background: #fef3c7;
+//       border-left: 4px solid #f59e0b;
+//       padding: 1rem;
+//       margin-bottom: 0.75rem;
+//       border-radius: 0 calc(var(--border-radius) / 2) calc(var(--border-radius) / 2) 0;
 
-      .issue-severity {
-        display: inline-block;
-        font-size: 0.75rem;
-        padding: 0.125rem 0.5rem;
-        border-radius: 10px;
-        font-weight: 600;
-        margin-left: 0.5rem;
+//       .issue-severity {
+//         display: inline-block;
+//         font-size: 0.75rem;
+//         padding: 0.125rem 0.5rem;
+//         border-radius: 10px;
+//         font-weight: 600;
+//         margin-left: 0.5rem;
 
-        &.HIGH {
-          background: #dc2626;
-          color: white;
-        }
+//         &.HIGH {
+//           background: #dc2626;
+//           color: white;
+//         }
 
-        &.MEDIUM {
-          background: #f59e0b;
-          color: white;
-        }
+//         &.MEDIUM {
+//           background: #f59e0b;
+//           color: white;
+//         }
 
-        &.LOW {
-          background: #3b82f6;
-          color: white;
-        }
-      }
+//         &.LOW {
+//           background: #3b82f6;
+//           color: white;
+//         }
+//       }
 
-      .issue-description {
-        margin: 0.5rem 0;
-        color: #7c2d12;
-      }
+//       .issue-description {
+//         margin: 0.5rem 0;
+//         color: #7c2d12;
+//       }
 
-      .issue-impact {
-        font-size: 0.875rem;
-        color: #92400e;
-        font-style: italic;
-      }
+//       .issue-impact {
+//         font-size: 0.875rem;
+//         color: #92400e;
+//         font-style: italic;
+//       }
 
-      .issue-recommendation {
-        margin-top: 0.5rem;
-        padding: 0.5rem;
-        background: white;
-        border-radius: calc(var(--border-radius) / 4);
-        font-size: 0.875rem;
-      }
-    }
-  }
-}
+//       .issue-recommendation {
+//         margin-top: 0.5rem;
+//         padding: 0.5rem;
+//         background: white;
+//         border-radius: calc(var(--border-radius) / 4);
+//         font-size: 0.875rem;
+//       }
+//     }
+//   }
+// }

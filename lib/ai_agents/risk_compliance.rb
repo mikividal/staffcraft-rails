@@ -1,163 +1,225 @@
 module AiAgents
   class RiskCompliance < BaseAgent
+    def token_limit
+      800  # From our updated limits - shortest agent
+    end
+
     def build_prompt
       <<~PROMPT
-        <role>Risk management consultant and compliance expert with expertise in operational risk, regulatory requirements, and business continuity. Former Big 4 consultant with deep experience in automation risk assessment and mitigation strategies.</role>
+        You are a risk management consultant specializing in automation implementation risks and regulatory compliance. You can only do web searches. *No hallucination* if any required context slot is blank, never invent.
 
-        <risk_context>
-        Business Environment: #{@form_data['business_type']} in #{@form_data['country']}
-        Process Criticality: #{@form_data['process_description']}
-        Team Vulnerability: #{@form_data['team_size']} #{@form_data['technical_expertise']} team
-        Timeline Pressure: #{@form_data['timeline']}
-        Known Constraints: #{@form_data['constraints']}
-        Current Dependencies: #{@form_data['current_stack']}
-        </risk_context>
+        CONTEXT:
+        CONTEXT:
+        #{data_quality_instructions}
+        #{handle_previous_failures}
+        #{form_context}
 
-        <risk_assessment_framework>
-        Primary Risk Categories:
-        #{primary_risk_categories}
+        YOUR TASK:
+        Assess risks and compliance requirements for implementing #{@form_data['process_description']} automation in your business.
 
-        Business Context Risks:
-        #{business_context_risks}
+        SEARCH PRIORITY:
+        1. "#{@form_data['business_type']} #{@form_data['process_description']} automation risks regulatory compliance"
+        2. "#{@form_data['process_description']} automation implementation failed lessons learned"
+        3. "#{build_compliance_search} data protection requirements"
 
-        Implementation Risks:
-        #{implementation_specific_risks}
-        </risk_assessment_framework>
+        #{output_format_instructions}
 
-        <risk_investigation>
-        Execute targeted searches for risk validation (6-8 focused searches):
-
-        1. INDUSTRY-SPECIFIC RISKS:
-           #{industry_risk_searches}
-
-        2. IMPLEMENTATION FAILURE PATTERNS:
-           #{failure_pattern_searches}
-
-        3. REGULATORY/COMPLIANCE RISKS:
-           #{compliance_risk_searches}
-
-        4. OPERATIONAL CONTINUITY RISKS:
-           #{continuity_risk_searches}
-        </risk_investigation>
-
-        <output_requirements>
+        SPECIFIC DATA STRUCTURE for "specific_data":
+        ```json
         {
-          "riskRankings": [
-            {
-              "option": "specific_approach",
-              "riskScore": float,
-              "confidence": "HIGH/MEDIUM/LOW",
-              "riskProfile": {
-                "operationalRisks": [
-                  {
-                    "risk": "specific operational risk",
-                    "probability": "HIGH/MEDIUM/LOW - Source: [data]",
-                    "impact": "quantified business impact",
-                    "timeline": "when this risk typically manifests",
-                    "mitigation": "practical mitigation strategy",
-                    "residualRisk": "remaining risk after mitigation"
-                  }
-                ],
-                "financialRisks": [/* financial risk analysis */],
-                "complianceRisks": [/* regulatory/compliance risks */],
-                "technicalRisks": [/* implementation/technical risks */]
-              },
-              "riskMitigation": {
-                "preventive": ["proactive risk prevention measures"],
-                "contingency": ["backup plans if risks materialize"],
-                "monitoring": ["early warning indicators"],
-                "governance": ["oversight and control mechanisms"]
-              },
-              "businessContinuity": {
-                "fallbackOptions": ["what to do if primary approach fails"],
-                "rollbackPlan": "how to safely reverse implementation",
-                "supportStructure": "required support for risk management"
+          "specific_data": {
+            "overall_risk_level": "LOW/MEDIUM/HIGH",
+            "top_risks": [
+              {
+                "risk_name": "Specific risk (e.g., Data Security Breach)",
+                "probability": "LOW/MEDIUM/HIGH",
+                "impact": "LOW/MEDIUM/HIGH",
+                "description": "What could go wrong",
+                "mitigation": "How to prevent/reduce this risk"
               }
+            ],
+            "compliance_requirements": {
+              "data_protection": "GDPR/CCPA/other applicable laws",
+              "industry_specific": "Sector-specific compliance needs",
+              "security_standards": "Required security measures",
+              "audit_requirements": "Record keeping and reporting needs"
+            },
+            "implementation_risks": {
+              "technical_risk": "LOW/MEDIUM/HIGH",
+              "operational_risk": "LOW/MEDIUM/HIGH",
+              "vendor_dependency_risk": "LOW/MEDIUM/HIGH",
+              "team_capability_risk": "LOW/MEDIUM/HIGH"
+            },
+            "business_continuity": {
+              "backup_plan": "What to do if automation fails",
+              "rollback_strategy": "How to safely reverse implementation",
+              "monitoring_requirements": "What to watch for early warnings",
+              "support_structure": "Required ongoing support"
+            },
+            "risk_mitigation_cost": {
+              "additional_security": "$XXX/month",
+              "compliance_tools": "$XXX setup + $XXX/month",
+              "backup_processes": "$XXX/month",
+              "total_risk_budget": "$X,XXX estimated"
+            },
+            "red_flags": [
+              "Deal-breaker risks that should stop implementation",
+              "Warning signs to monitor during rollout"
+            ],
+            "risk_vs_reward": {
+              "acceptable_risk_level": "Based on business type and timeline",
+              "risk_tolerance_recommendation": "Conservative/Moderate/Aggressive approach",
+              "monitoring_frequency": "How often to review risks"
             }
-          ],
-          "riskMatrix": {
-            "highImpactHighProb": ["critical risks requiring immediate attention"],
-            "highImpactLowProb": ["low probability but severe consequence risks"],
-            "lowImpactHighProb": ["nuisance risks to monitor"],
-            "acceptableRisks": ["risks within tolerance levels"]
-          },
-          "reasoningChain": [/* risk assessment reasoning */],
-          "riskRecommendations": {
-            "criticalActions": ["must-do risk mitigation steps"],
-            "riskTolerance": "recommended risk appetite for #{@form_data['business_type']}",
-            "decisionFramework": "how to evaluate risk vs reward tradeoffs"
           }
         }
-        </output_requirements>
+        ```
 
-        <risk_excellence>
-        - Identify risks specific to #{@form_data['business_type']} industry context
-        - Consider #{@form_data['timeline']} pressure as risk amplifier
-        - Factor in #{@form_data['team_size']} team's risk management capacity
-        - Address #{@form_data['constraints']} as potential risk sources
-        - Provide actionable mitigation strategies, not just risk identification
-        </risk_excellence>
+        CRITICAL RISK CONSIDERATIONS:
+        - Business type: #{@form_data['business_type']} has specific regulatory requirements
+        - Team capability: #{@form_data['technical_expertise']} affects implementation risks
+        - Timeline pressure: #{@form_data['timeline']} may increase risk levels
+        - Process criticality: How important is #{@form_data['process_description']} to business operations
+        - Focus on ACTIONABLE risks with specific mitigation strategies
+        - Include costs of risk mitigation in analysis
       PROMPT
     end
 
     private
 
-    def primary_risk_categories
+    def build_compliance_search
       case @form_data['business_type']
       when 'SaaS B2B'
-        "Data security, customer SLA violations, integration failures, vendor lock-in"
+        "SaaS GDPR SOC2"
       when 'E-commerce'
-        "Transaction processing disruption, inventory sync issues, customer experience degradation"
+        "ecommerce PCI DSS customer data"
       when 'Agency'
-        "Client delivery risks, quality control issues, resource dependency"
+        "agency client data confidentiality"
       else
-        "Operational continuity, quality degradation, cost overruns, implementation failure"
+        "#{@form_data['business_type']} automation compliance"
       end
-    end
-
-    def business_context_risks
-      if @form_data['timeline'] == 'asap'
-        "Rush implementation increases error probability, inadequate testing, poor change management"
-      elsif @form_data['team_size'] == '1'
-        "Single point of failure, knowledge concentration, no backup resources"
-      else
-        "Standard business context risks for #{@form_data['business_type']}"
-      end
-    end
-
-    def implementation_specific_risks
-      case @form_data['technical_expertise']
-      when 'non-technical'
-        "High vendor dependency, limited troubleshooting capability, black box operations"
-      when 'advanced'
-        "Over-engineering risk, custom solution maintenance burden, technical debt accumulation"
-      else
-        "Moderate technical risks, skill gap challenges, partial dependency on vendors"
-      end
-    end
-
-    def industry_risk_searches
-      '"' + @form_data['business_type'] + ' ' + @form_data['process_description'] + ' automation risks regulatory compliance"'
-    end
-
-    def failure_pattern_searches
-      '"site:reddit.com ' + @form_data['process_description'] + ' automation implementation failed why disaster"'
-    end
-
-    def compliance_risk_searches
-      constraints = @form_data['constraints'] || ""
-      if constraints.downcase.include?('compliance') || constraints.downcase.include?('security')
-        '"' + @form_data['business_type'] + ' automation compliance requirements ' + @form_data['country'] + '"'
-      else
-        '"' + @form_data['business_type'] + ' ' + @form_data['process_description'] + ' automation regulatory risks"'
-      end
-    end
-
-    def continuity_risk_searches
-      '"' + @form_data['process_description'] + ' automation vendor failure backup plan business continuity"'
     end
   end
 end
+
+# module AiAgents
+#   class RiskCompliance < BaseAgent
+#     def build_prompt
+#       <<~PROMPT
+#         <role>Risk management consultant and compliance expert with expertise in operational risk, regulatory requirements, and business continuity. Former Big 4 consultant with deep experience in automation risk assessment and mitigation strategies.</role>
+
+#         <risk_context>
+#         Business Environment: #{@form_data['business_type']} in #{@form_data['country']}
+#         Process Criticality: #{@form_data['process_description']}
+#         Team Vulnerability: #{@form_data['team_size']} #{@form_data['technical_expertise']} team
+#         Timeline Pressure: #{@form_data['timeline']}
+#         Known Constraints: #{@form_data['constraints']}
+#         Current Dependencies: #{@form_data['current_stack']}
+#         </risk_context>
+
+#         <risk_assessment_framework>
+#         Primary Risk Categories:
+#         #{primary_risk_categories}
+
+#         Business Context Risks:
+#         #{business_context_risks}
+
+#         Implementation Risks:
+#         #{implementation_specific_risks}
+#         </risk_assessment_framework>
+
+#         <risk_investigation>
+#         Execute targeted searches for risk validation (6-8 focused searches):
+
+#         1. INDUSTRY-SPECIFIC RISKS:
+#            #{industry_risk_searches}
+
+#         2. IMPLEMENTATION FAILURE PATTERNS:
+#            #{failure_pattern_searches}
+
+#         3. REGULATORY/COMPLIANCE RISKS:
+#            #{compliance_risk_searches}
+
+#         4. OPERATIONAL CONTINUITY RISKS:
+#            #{continuity_risk_searches}
+#         </risk_investigation>
+
+#         <output_requirements>
+#           Return exactly this JSON (no comments or extra lines):
+#           {
+#             "analysis": "Here goes a narrative text with the 3 key risks, 3 mitigation actions, and the overall confidence level."
+#         }
+#         </output_requirements>
+
+#         <risk_excellence>
+#         - Identify risks specific to #{@form_data['business_type']} industry context
+#         - Consider #{@form_data['timeline']} pressure as risk amplifier
+#         - Factor in #{@form_data['team_size']} team's risk management capacity
+#         - Address #{@form_data['constraints']} as potential risk sources
+#         - Provide actionable mitigation strategies, not just risk identification
+#         </risk_excellence>
+#       PROMPT
+#     end
+
+#     private
+
+#     def primary_risk_categories
+#       case @form_data['business_type']
+#       when 'SaaS B2B'
+#         "Data security, customer SLA violations, integration failures, vendor lock-in"
+#       when 'E-commerce'
+#         "Transaction processing disruption, inventory sync issues, customer experience degradation"
+#       when 'Agency'
+#         "Client delivery risks, quality control issues, resource dependency"
+#       else
+#         "Operational continuity, quality degradation, cost overruns, implementation failure"
+#       end
+#     end
+
+#     def business_context_risks
+#       if @form_data['timeline'] == 'asap'
+#         "Rush implementation increases error probability, inadequate testing, poor change management"
+#       elsif @form_data['team_size'] == '1'
+#         "Single point of failure, knowledge concentration, no backup resources"
+#       else
+#         "Standard business context risks for #{@form_data['business_type']}"
+#       end
+#     end
+
+#     def implementation_specific_risks
+#       case @form_data['technical_expertise']
+#       when 'non-technical'
+#         "High vendor dependency, limited troubleshooting capability, black box operations"
+#       when 'advanced'
+#         "Over-engineering risk, custom solution maintenance burden, technical debt accumulation"
+#       else
+#         "Moderate technical risks, skill gap challenges, partial dependency on vendors"
+#       end
+#     end
+
+#     def industry_risk_searches
+#       '"' + @form_data['business_type'] + ' ' + @form_data['process_description'] + ' automation risks regulatory compliance"'
+#     end
+
+#     def failure_pattern_searches
+#       '"site:reddit.com ' + @form_data['process_description'] + ' automation implementation failed why disaster"'
+#     end
+
+#     def compliance_risk_searches
+#       constraints = @form_data['constraints'] || ""
+#       if constraints.downcase.include?('compliance') || constraints.downcase.include?('security')
+#         '"' + @form_data['business_type'] + ' automation compliance requirements ' + @form_data['country'] + '"'
+#       else
+#         '"' + @form_data['business_type'] + ' ' + @form_data['process_description'] + ' automation regulatory risks"'
+#       end
+#     end
+
+#     def continuity_risk_searches
+#       '"' + @form_data['process_description'] + ' automation vendor failure backup plan business continuity"'
+#     end
+#   end
+# end
+
 
 # module AiAgents
 #   class RiskCompliance < BaseAgent
