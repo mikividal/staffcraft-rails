@@ -1,6 +1,7 @@
 class Analysis < ApplicationRecord
   has_one :form_data, dependent: :destroy
   has_many :agent_results, dependent: :destroy
+  accepts_nested_attributes_for :form_data
 
   enum status: {
     pending: 0,
@@ -48,6 +49,25 @@ class Analysis < ApplicationRecord
 
   def reasoning_chains
     agent_results.where.not(reasoning_chain: nil).pluck(:agent_name, :reasoning_chain)
+  end
+
+  def full_context_for_ai
+    return {} unless form_data.present?
+
+      {
+        analysis_id: id,
+        status: status,
+        form_context: form_data.to_context_hash,
+        created_at: created_at,
+        progress: progress_percentage
+      }
+  end
+
+    # Para verificar si tiene toda la info necesaria
+  def ready_for_ai_analysis?
+    form_data.present? &&
+    form_data.company_name.present? &&
+    form_data.role_title.present?
   end
 
   private

@@ -2,8 +2,10 @@ import { Application } from "@hotwired/stimulus"
 
 const application = Application.start()
 
-// Configure Stimulus development experience
-application.debug = false
-window.Stimulus   = application
+// Forzar logs
+application.debug = true
+console.error("🚨 Stimulus Application Iniciada")
+
+window.Stimulus = application
 
 export { application }
