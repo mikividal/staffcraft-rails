@@ -1,502 +1,453 @@
-<div data-controller="analysis">
-<p> hola </p>
-</div>
-
-<div data-controller="test">Prueba de Controlador</div>
-
 <% content_for :head do %>
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="<%= request.original_url %>">
 <% end %>
 
-
-  <div class="container-fluid py-5">
-    <div class="row justify-content-center">
-      <div class="col-12 col-xl-10">
-
-        <!-- Header Section -->
-        <div class="text-center mb-5">
-          <h1 class="display-5 fw-bold text-primary mb-3">StaffCraft Hiring Analysis</h1>
-          <p class="lead text-muted mb-4">Get AI-powered recommendations on whether to hire talent or implement automation</p>
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h3 class="card-title mb-0">StaffCraft Hiring Analysis</h3>
+          <small class="text-light">Help us find the perfect solution for your role</small>
         </div>
 
-        <!-- Progress Steps -->
-        <div class="steps-container mb-5">
-          <div class="step active" data-step="1">
-            <div class="step-number">1</div>
-            <div class="step-title">Company</div>
-          </div>
-          <div class="step" data-step="2">
-            <div class="step-number">2</div>
-            <div class="step-title">Role</div>
-          </div>
-          <div class="step" data-step="3">
-            <div class="step-number">3</div>
-            <div class="step-title">Goals</div>
-          </div>
-          <div class="step" data-step="4">
-            <div class="step-number">4</div>
-            <div class="step-title">Tools</div>
-          </div>
-          <div class="step" data-step="5">
-            <div class="step-number">5</div>
-            <div class="step-title">Compliance</div>
-          </div>
-        </div>
+        <div class="card-body">
+          <%= simple_form_for @analysis, html: { class: "needs-validation", novalidate: true } do |f| %>
 
-        <!-- Main Form Card -->
-        <div class="card border-0 shadow-lg">
-          <div class="card-body p-0">
-            <%= simple_form_for @analysis, html: { class: "needs-validation", novalidate: true, id: "staffcraft-form" } do |f| %>
+            <!-- NESTED FORM FOR FORM_DATA -->
+            <%= f.simple_fields_for :form_data do |ff| %>
 
-              <%= f.simple_fields_for :form_data do |ff| %>
-                <!-- Section 1: Company Snapshot -->
-                <div class="form-section" id="section-1">
-                  <div class="section-header bg-primary text-white p-4">
-                    <h4 class="mb-0"><i class="fas fa-building me-3"></i>Company Snapshot</h4>
-                    <small class="opacity-75">Tell us about your company</small>
-                  </div>
+              <!-- 1. Company Snapshot -->
+              <div class="section-divider mb-4">
+                <h4 class="section-title">
+                  <span class="badge badge-primary me-2">1</span>
+                  Company Snapshot
+                </h4>
+              </div>
 
-                  <div class="section-content bg-light p-5">
-                    <div class="row g-4">
-                      <div class="col-md-6">
-                        <%= ff.input :company_name,
-                            label: "Company Name",
-                            input_html: {
-                              class: "form-control form-control-lg",
-                              placeholder: "Enter your company name",
-                              required: true
-                            },
-                            required: true %>
-                      </div>
-                      <div class="col-md-6">
-                        <%= ff.input :company_url,
-                            label: "Company Website",
-                            input_html: {
-                              class: "form-control form-control-lg",
-                              type: "url",
-                              placeholder: "https://your-company.com"
-                            } %>
-                      </div>
-                    </div>
-
-                    <div class="row g-4 mt-2">
-                      <div class="col-md-4">
-                        <%= ff.input :industry_business_model,
-                            as: :select,
-                            collection: [
-                              ['SaaS B2B', 'saas_b2b'],
-                              ['SaaS B2C', 'saas_b2c'],
-                              ['E-commerce', 'ecommerce'],
-                              ['Consulting', 'consulting'],
-                              ['Marketing/Creative Agency', 'marketing_agency'],
-                              ['PR/Communications Agency', 'pr_agency'],
-                              ['Recruitment/Staffing Agency', 'recruitment_agency'],
-                              ['Services B2B', 'services_b2b'],
-                              ['Services B2C', 'services_b2c'],
-                              ['Real Estate', 'real_estate'],
-                              ['Marketplace', 'marketplace'],
-                              ['Non-profit', 'nonprofit'],
-                              ['Other', 'industry_other']
-                            ],
-                            label: "Industry & Business Model",
-                            input_html: {
-                              class: "form-select form-select-lg",
-                                data: {
-                                  action: "change->analysis#toggleOtherField",
-                                  toggle_target: "industry_other_group"
-                                }
-                            },
-                            include_blank: "Select your industry" %>
-                      </div>
-
-                      <div class="col-md-4">
-                        <%= ff.input :annual_revenue_band,
-                            as: :select,
-                            collection: [
-                              ['Pre-revenue', 'pre_revenue'],
-                              ['< $500k', 'under_500k'],
-                              ['$500k–$2M', 'k500_2m'],
-                              ['$2–10M', 'm2_10m'],
-                              ['$10–50M', 'm10_50m'],
-                              ['> $50M', 'over_50m']
-                            ],
-                            label: "Annual Revenue",
-                            input_html: { class: "form-select form-select-lg" },
-                            include_blank: "Select revenue range" %>
-                      </div>
-
-                      <div class="col-md-4">
-                        <%= ff.input :company_size,
-                            as: :select,
-                            collection: [
-                              ['Solo-founder', 'solo'],
-                              ['2–5 employees', 'size_2_5'],
-                              ['6–20 employees', 'size_6_20'],
-                              ['21–50 employees', 'size_21_50'],
-                              ['51–100 employees', 'size_51_100'],
-                              ['100+ employees', 'size_100_plus']
-                            ],
-                            label: "Company Size",
-                            input_html: { class: "form-select form-select-lg" },
-                            include_blank: "Select company size" %>
-                      </div>
-                    </div>
-
-                    <div class="row g-4 mt-2">
-                      <div class="col-md-6">
-                        <%= ff.input :technical_maturity,
-                            as: :select,
-                            collection: [
-                              ['Non-technical', 'non_technical'],
-                              ['Tool power-users', 'power_users'],
-                              ['API-comfortable', 'api_comfortable'],
-                              ['Can code', 'can_code']
-                            ],
-                            label: "Technical Maturity",
-                            input_html: { class: "form-select form-select-lg" },
-                            include_blank: "How technical is your team?" %>
-                      </div>
-                    <div class="col-md-6">
-                      <div class="conditional-field-group" id="industry_other_group" style="display: none;">
-                        <%= ff.input :industry_other,
-                            label: "If Other Industry, specify:",
-                            input_html: {
-                              class: "form-control form-control-lg",
-                              placeholder: "Specify your industry"
-                            } %>
-                      </div>
-                    </div>
-                  </div>
+              <div class="row">
+                <div class="col-md-6">
+                  <%= ff.input :company_name,
+                      label: "Company Name",
+                      input_html: { class: "form-control" },
+                      required: true %>
                 </div>
-                  <div class="section-footer p-4 text-center">
-                    <button type="button" data-action="click->analysis#showSection" data-section-number-value="2">
-                      Continue to Role Details <i class="fas fa-arrow-right ms-2"></i>
-                    </button>
-                  </div>
+                <div class="col-md-6">
+                  <%= ff.input :company_url,
+                      label: "Company URL",
+                      input_html: { class: "form-control", type: "url" } %>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6">
+                  <%= ff.input :industry_business_model,
+                      as: :select,
+                      collection: [
+                        ['SaaS B2B', 'saas_b2b'],
+                        ['SaaS B2C', 'saas_b2c'],
+                        ['E-commerce', 'ecommerce'],
+                        ['Consulting', 'consulting'],
+                        ['Marketing/Creative Agency', 'marketing_agency'],
+                        ['PR/Communications Agency', 'pr_agency'],
+                        ['Recruitment/Staffing Agency', 'recruitment_agency'],
+                        ['Services B2B', 'services_b2b'],
+                        ['Services B2C', 'services_b2c'],
+                        ['Real Estate', 'real_estate'],
+                        ['Marketplace', 'marketplace'],
+                        ['Non-profit', 'nonprofit'],
+                        ['Other', 'industry_other']
+                      ],
+                      label: "Industry & Business Model",
+                      input_html: { class: "form-select" },
+                      include_blank: "Select industry" %>
+                  <%= ff.input :industry_other,
+                      label: "If Other, specify:",
+                      input_html: { class: "form-control mt-2" } %>
                 </div>
 
-                <!-- Section 2: Role to Hire -->
-                <div class="form-section d-none" id="section-2">
-                  <div class="section-header bg-success text-white p-4">
-                    <h4 class="mb-0"><i class="fas fa-user-tie me-3"></i>Role to Hire</h4>
-                    <small class="opacity-75">Define the position you need</small>
-                  </div>
+                <div class="col-md-6">
+                  <%= ff.input :annual_revenue_band,
+                      as: :select,
+                      collection: [
+                        ['Pre-revenue', 'pre_revenue'],
+                        ['< $500k', 'under_500k'],
+                        ['$500k–$2M', 'k500_2m'],
+                        ['$2–10M', 'm2_10m'],
+                        ['$10–50M', 'm10_50m'],
+                        ['> $50M', 'over_50m']
+                      ],
+                      label: "Annual Revenue Band (USD)",
+                      input_html: { class: "form-select" },
+                      include_blank: "Select revenue band" %>
 
-                  <div class="section-content bg-light p-5">
-                    <div class="row g-4">
-                      <div class="col-md-6">
-                        <%= ff.input :role_title,
-                            label: "Role Title",
-                            input_html: {
-                              class: "form-control form-control-lg",
-                              placeholder: "e.g., Growth Marketer, Senior Developer",
-                              required: true
-                            },
-                            required: true %>
-                      </div>
-                      <div class="col-md-6">
-                        <%= ff.input :department_function,
-                            as: :select,
-                            collection: [
-                              ['Sales', 'sales'],
-                              ['Marketing', 'marketing'],
-                              ['Product', 'product'],
-                              ['Engineering', 'engineering'],
-                              ['Operations', 'ops'],
-                              ['Finance', 'finance'],
-                              ['Customer Success', 'customer_success'],
-                              ['HR / People', 'hr_people'],
-                              ['Legal / Compliance', 'legal_compliance'],
-                              ['Other', 'department_other']
-                            ],
-                            label: "Department",
-                            input_html: {
-                              class: "form-select form-select-lg",
-                              data: {
-                                action: "change->analysis#toggleOtherField",
-                                toggle_target: "department_other_group"
-                              }
-                            },
-                            include_blank: "Select department" %>
-                      </div>
-                    </div>
+                  <%= ff.input :company_size,
+                      as: :select,
+                      collection: [
+                        ['Solo-founder', 'solo'],
+                        ['2–5', 'size_2_5'],
+                        ['6–20', 'size_6_20'],
+                        ['21–50', 'size_21_50'],
+                        ['51–100', 'size_51_100'],
+                        ['100+', 'size_100_plus']
+                      ],
+                      label: "Company Size",
+                      input_html: { class: "form-select" },
+                      include_blank: "Select company size" %>
 
-                    <div class="row g-4 mt-2">
-                      <div class="col-md-4">
-                        <%= ff.input :seniority_level,
-                            as: :select,
-                            collection: [
-                              ['Junior (0-2 years)', 'junior'],
-                              ['Mid-level (2-5 years)', 'mid'],
-                              ['Senior (5+ years)', 'senior'],
-                              ['Expert (10+ years)', 'expert']
-                            ],
-                            label: "Seniority Level",
-                            input_html: { class: "form-select form-select-lg" },
-                            include_blank: "Select experience level" %>
-                      </div>
-                      <div class="col-md-4">
-                        <%= ff.input :employment_type,
-                            as: :select,
-                            collection: [
-                              ['Full-time employee', 'full_time'],
-                              ['Part-time employee', 'part_time'],
-                              ['Contractor / Freelancer', 'contractor'],
-                              ['Fractional executive', 'fractional']
-                            ],
-                            label: "Employment Type",
-                            input_html: { class: "form-select form-select-lg" },
-                            include_blank: "Select employment type" %>
-                      </div>
-                      <div class="col-md-4">
-                        <%= ff.input :monthly_budget_ceiling,
-                            as: :select,
-                            collection: [
-                              ['Up to $800', 'up_to_800'],
-                              ['$800 - $2,000', 'under_2k'],
-                              ['$2,000 - $5,000', 'k2_5k'],
-                              ['$5,000 - $10,000', 'k5_10k'],
-                              ['$10,000 - $20,000', 'k10_20k'],
-                              ['$20,000+', 'over_20k']
-                            ],
-                            label: "Monthly Budget",
-                            input_html: { class: "form-select form-select-lg" },
-                            include_blank: "Select budget range" %>
-                      </div>
-                    </div>
+                  <%= ff.input :technical_maturity,
+                      as: :select,
+                      collection: [
+                        ['Non-technical', 'non_technical'],
+                        ['Tool power-users', 'power_users'],
+                        ['API-comfortable', 'api_comfortable'],
+                        ['Can code', 'can_code']
+                      ],
+                      label: "Technical Maturity",
+                      input_html: { class: "form-select" },
+                      include_blank: "Select technical level" %>
+                </div>
+              </div>
 
-                    <div class="row g-4 mt-2">
-                      <div class="col-md-6">
-                        <%= ff.input :deadline_to_fill,
-                            as: :select,
-                            collection: [
-                              ['ASAP', 'asap'],
-                              ['< 1 month', 'under_1_month'],
-                              ['< 3 months', 'under_3_months'],
-                              ['< 6 months', 'under_6_months'],
-                              ['Just exploring', 'exploring']
-                            ],
-                            label: "Deadline to Fill Role",
-                            input_html: { class: "form-select form-select-lg" },
-                            include_blank: "Select timeline" %>
-                      </div>
-                      <div class="col-md-6">
-                        <div class="conditional-field-group" id="department_other_group" style="display: none;">
-                          <%= ff.input :department_other,
-                              label: "If Other Department, specify:",
-                              input_html: {
-                                class: "form-control form-control-lg",
-                                placeholder: "Specify department"
-                              } %>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+              <!-- 2. Role to Hire -->
+              <div class="section-divider mb-4 mt-5">
+                <h4 class="section-title">
+                  <span class="badge badge-primary me-2">2</span>
+                  Role to Hire
+                </h4>
+              </div>
 
-                  <div class="section-footer p-4 text-center">
-                    <button type="button" class="btn btn-outline-secondary btn-lg me-3"
-                      data-action="click->analysis#showSection"
-                      data-section-number-value="1">
-                      <i class="fas fa-arrow-left me-2"></i>Back
-                    </button>
-                    <button type="button" data-action="click->analysis#showSection" data-section-number-value="3">
-                      Continue to Goals <i class="fas fa-arrow-right ms-2"></i>
-                    </button>
-                  </div>
+              <div class="row">
+                <div class="col-md-6">
+                  <%= ff.input :role_title,
+                      label: "Role Title",
+                      placeholder: "e.g., Growth Marketer, Senior RevOps Analyst",
+                      input_html: { class: "form-control" },
+                      required: true %>
+
+                  <%= ff.input :department_function,
+                      as: :select,
+                      collection: [
+                        ['Sales', 'sales'],
+                        ['Marketing', 'marketing'],
+                        ['Product', 'product'],
+                        ['Engineering', 'engineering'],
+                        ['Ops', 'ops'],
+                        ['Finance', 'finance'],
+                        ['Customer Success', 'customer_success'],
+                        ['HR / People', 'hr_people'],
+                        ['Legal / Compliance', 'legal_compliance'],
+                        ['Other', 'department_other']
+                      ],
+                      label: "Department / Function",
+                      input_html: { class: "form-select" },
+                      include_blank: "Select department" %>
+                  <%= ff.input :department_other,
+                      label: "If Other, specify:",
+                      input_html: { class: "form-control" } %>
+
+                  <%= ff.input :seniority_level,
+                      as: :select,
+                      collection: [
+                        ['Junior (0-2 yrs)', 'junior'],
+                        ['Mid (2-5 yrs)', 'mid'],
+                        ['Senior (5+ yrs)', 'senior'],
+                        ['Expert (10+ yrs)', 'expert']
+                      ],
+                      label: "Seniority Level",
+                      input_html: { class: "form-select" },
+                      include_blank: "Select seniority level" %>
                 </div>
 
-                <!-- Section 3: Pain Points & Goals -->
-                <div class="form-section d-none" id="section-3">
-                  <div class="section-header bg-warning text-dark p-4">
-                    <h4 class="mb-0"><i class="fas fa-target me-3"></i>Pain Points & Goals</h4>
-                    <small class="opacity-75">What challenges are you solving?</small>
-                  </div>
+                <div class="col-md-6">
+                  <%= ff.input :employment_type,
+                      as: :select,
+                      collection: [
+                        ['Full-time employee', 'full_time'],
+                        ['Part-time employee', 'part_time'],
+                        ['Contractor / Freelancer', 'contractor'],
+                        ['Fractional Executive', 'fractional']
+                      ],
+                      label: "Employment Type",
+                      input_html: { class: "form-select" },
+                      include_blank: "Select employment type" %>
 
-                  <div class="section-content bg-light p-5">
-                    <div class="row g-4">
-                      <div class="col-md-12">
-                        <%= ff.input :desired_outcome,
-                            as: :text,
-                            label: "Desired Outcome / Success Definition",
-                            input_html: {
-                              class: "form-control form-control-lg",
-                              rows: 4,
-                              placeholder: "Describe what success looks like for this role..."
-                            } %>
-                      </div>
-                    </div>
+                  <%= ff.input :location_type,
+                      as: :select,
+                      collection: [
+                        ['Remote anywhere', 'remote_anywhere'],
+                        ['Remote time-zone aligned', 'remote_timezone'],
+                        ['Hybrid', 'hybrid'],
+                        ['On-site', 'onsite']
+                      ],
+                      label: "Location",
+                      input_html: { class: "form-select" },
+                      include_blank: "Select location type" %>
 
-                    <div class="row g-4 mt-2">
-                      <div class="col-md-6">
-                        <%= ff.input :current_kpi_baseline,
-                            label: "Current KPI Baseline",
-                            input_html: {
-                              class: "form-control form-control-lg",
-                              placeholder: "e.g., Avg. 4 hrs per ticket, 2% error rate"
-                            } %>
-                      </div>
-                      <div class="col-md-6">
-                        <%= ff.input :target_improvement,
-                            label: "Target Improvement / ROI Goal",
-                            input_html: {
-                              class: "form-control form-control-lg",
-                              placeholder: "e.g., Cut cycle time 50%, Save $5k/month"
-                            } %>
-                      </div>
-                    </div>
+                  <%= ff.input :working_hours_timezone,
+                      as: :select,
+                      collection: [
+                        ['UTC', 'utc'],
+                        ['EST (UTC-5)', 'est'],
+                        ['PST (UTC-8)', 'pst'],
+                        ['CET (UTC+1)', 'cet'],
+                        ['Other', 'other']
+                      ],
+                      label: "Working Hours (if time-zone aligned)",
+                      input_html: { class: "form-select" },
+                      include_blank: "Select timezone" %>
 
-                    <div class="row g-4 mt-2">
-                      <div class="col-md-12">
-                        <%= ff.input :manual_tasks_friction,
-                            as: :text,
-                            label: "Manual Tasks Creating Friction",
-                            input_html: {
-                              class: "form-control form-control-lg",
-                              rows: 4,
-                              placeholder: "• List the repetitive tasks\n• That are slowing you down\n• And could be automated"
-                            } %>
-                      </div>
-                    </div>
-                  </div>
+                  <%= ff.input :onsite_location,
+                      label: "Location (if on-site / Hybrid)",
+                      placeholder: "City, Country",
+                      input_html: { class: "form-control" } %>
+                </div>
+              </div>
 
-                  <div class="section-footer p-4 text-center">
-                    <button type="button" class="btn btn-outline-secondary btn-lg me-3"
-                      data-action="click->analysis#showSection"
-                      data-section-number-value="2">
-                      <i class="fas fa-arrow-left me-2"></i>Back
-                    </button>
-                    <button type="button" data-action="click->analysis#showSection" data-section-number-value="4">
-                      Continue to Tools <i class="fas fa-arrow-right ms-2"></i>
-                    </button>
-                  </div>
+              <div class="row">
+                <div class="col-md-6">
+                  <%= ff.input :must_have_skills,
+                      label: "Must-Have Hard Skills",
+                      placeholder: "Enter skills separated by commas",
+                      input_html: { class: "form-control" } %>
+
+                  <%= ff.input :monthly_budget_ceiling,
+                      as: :select,
+                      collection: [
+                        ['Up to $800', 'up_to_800'],
+                        ['< $2k', 'under_2k'],
+                        ['$2–5k', 'k2_5k'],
+                        ['$5–10k', 'k5_10k'],
+                        ['$10–20k', 'k10_20k'],
+                        ['> $20k', 'over_20k']
+                      ],
+                      label: "Monthly Budget Ceiling",
+                      input_html: { class: "form-select" },
+                      include_blank: "Select budget range" %>
                 </div>
 
-                <!-- Section 4: Tools & Process Context -->
-                <div class="form-section d-none" id="section-4">
-                  <div class="section-header bg-info text-white p-4">
-                    <h4 class="mb-0"><i class="fas fa-tools me-3"></i>Tools & Process Context</h4>
-                    <small class="opacity-75">Tell us about your current tech stack</small>
-                  </div>
+                <div class="col-md-6">
+                  <%= ff.input :preferred_compensation_model,
+                      as: :check_boxes,
+                      collection: [
+                        ['Salary', 'salary'],
+                        ['Hourly', 'hourly'],
+                        ['Retainer', 'retainer'],
+                        ['Commission / Bonus', 'commission'],
+                        ['Other', 'other']
+                      ],
+                      label: "Preferred Compensation Model",
+                      item_wrapper_class: 'form-check',
+                      item_label_class: 'form-check-label' %>
+                  <%= ff.input :compensation_other,
+                      label: "If Other, specify:",
+                      input_html: { class: "form-control" } %>
 
-                  <div class="section-content bg-light p-5">
-                    <div class="row g-4">
-                      <div class="col-md-6">
-                        <%= ff.input :existing_tools_stack,
-                            label: "Existing Tools / Stack",
-                            input_html: {
-                              class: "form-control form-control-lg",
-                              placeholder: "e.g., HubSpot, Airtable, Notion, Zapier"
-                            } %>
-                      </div>
-                      <div class="col-md-6">
-                        <%= ff.input :existing_tools_custom,
-                            label: "Additional Tools",
-                            input_html: {
-                              class: "form-control form-control-lg",
-                              placeholder: "Custom tools, internal systems, etc."
-                            } %>
-                      </div>
-                    </div>
+                  <%= ff.input :contract_length,
+                      label: "Contract Length (if not FTE)",
+                      placeholder: "e.g., 6-month renewable",
+                      input_html: { class: "form-control" } %>
 
-                    <div class="row g-4 mt-2">
-                      <div class="col-md-6">
-                        <%= ff.input :key_integrations,
-                            label: "Key Integrations Already Live",
-                            input_html: {
-                              class: "form-control form-control-lg",
-                              placeholder: "e.g., API connections, Webhooks, etc."
-                            } %>
-                      </div>
-                      <div class="col-md-6">
-                        <%= ff.input :tried_automating,
-                            as: :select,
-                            collection: [
-                              ['Yes – worked', 'yes_worked'],
-                              ['Yes – failed', 'yes_failed'],
-                              ['Considering', 'considering'],
-                              ['Not yet', 'not_yet']
-                            ],
-                            label: "Have You Tried Automating?",
-                            input_html: { class: "form-select form-select-lg" },
-                            include_blank: "Select option" %>
-                      </div>
-                    </div>
-                  </div>
+                  <%= ff.input :deadline_to_fill,
+                      as: :select,
+                      collection: [
+                        ['ASAP', 'asap'],
+                        ['< 1 month', 'under_1_month'],
+                        ['< 3 months', 'under_3_months'],
+                        ['< 6 months', 'under_6_months'],
+                        ['Just exploring', 'exploring']
+                      ],
+                      label: "Deadline to Fill Role",
+                      input_html: { class: "form-select" },
+                      include_blank: "Select timeline" %>
+                </div>
+              </div>
 
-                  <div class="section-footer p-4 text-center">
-                    <button type="button" class="btn btn-outline-secondary btn-lg me-3"
-                      data-action="click->analysis#showSection"
-                      data-section-number-value="3">
-                      <i class="fas fa-arrow-left me-2"></i>Back
-                    </button>
-                    <button type="button" data-action="click->analysis#showSection" data-section-number-value="5">
-                      Continue to Compliance <i class="fas fa-arrow-right ms-2"></i>
-                    </button>
-                  </div>
+              <!-- 3. Pain Point & Goals -->
+              <div class="section-divider mb-4 mt-5">
+                <h4 class="section-title">
+                  <span class="badge badge-primary me-2">3</span>
+                  Pain Point & Goals
+                </h4>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6">
+                  <%= ff.input :primary_pain_point,
+                      as: :check_boxes,
+                      collection: [
+                        ['Capacity overload', 'capacity_overload'],
+                        ['Expertise gap', 'expertise_gap'],
+                        ['Quality issues', 'quality_issues'],
+                        ['Compliance risk', 'compliance_risk'],
+                        ['Cost pressure', 'cost_pressure'],
+                        ['Other', 'other']
+                      ],
+                      label: "Primary Pain Point",
+                      item_wrapper_class: 'form-check',
+                      item_label_class: 'form-check-label' %>
+                  <%= ff.input :pain_point_other,
+                      label: "If Other, specify:",
+                      input_html: { class: "form-control" } %>
+
+                  <%= ff.input :current_kpi_baseline,
+                      label: "Current KPI Baseline",
+                      placeholder: "e.g., Avg. 4 hrs per ticket, 2% error rate",
+                      input_html: { class: "form-control" } %>
+
+                  <%= ff.input :target_improvement,
+                      label: "Target Improvement / ROI Goal",
+                      placeholder: "e.g., Cut cycle time 50%, Save $5k/month",
+                      input_html: { class: "form-control" } %>
                 </div>
 
-                <!-- Section 5: Constraints & Compliance -->
-                <div class="form-section d-none" id="section-5">
-                  <div class="section-header bg-danger text-white p-4">
-                    <h4 class="mb-0"><i class="fas fa-shield-alt me-3"></i>Constraints & Compliance</h4>
-                    <small class="opacity-75">Security and regulatory requirements</small>
-                  </div>
+                <div class="col-md-6">
+                  <%= ff.input :desired_outcome,
+                      as: :text,
+                      label: "Desired Outcome / Success Definition",
+                      placeholder: "Describe what success looks like for this role...",
+                      input_html: { class: "form-control", rows: 6 } %>
+                </div>
+              </div>
 
-                  <div class="section-content bg-light p-5">
-                    <div class="row g-4">
-                      <div class="col-md-6">
-                        <%= ff.input :data_residency_needs,
-                            as: :select,
-                            collection: [
-                              ['US-only', 'us_only'],
-                              ['EU-only', 'eu_only'],
-                              ['Mixed', 'mixed'],
-                              ['No preference', 'no_preference']
-                            ],
-                            label: "Data Residency Needs",
-                            input_html: { class: "form-select form-select-lg" },
-                            include_blank: "Select preference" %>
-                      </div>
-                      <div class="col-md-6">
-                        <%= ff.input :regulatory_other,
-                            label: "Regulatory Requirements",
-                            input_html: {
-                              class: "form-control form-control-lg",
-                              placeholder: "e.g., GDPR, HIPAA, SOC 2, etc."
-                            } %>
-                      </div>
-                    </div>
+              <!-- 4. Tools & Process Context -->
+              <div class="section-divider mb-4 mt-5">
+                <h4 class="section-title">
+                  <span class="badge badge-primary me-2">4</span>
+                  Tools & Process Context within the Role
+                </h4>
+              </div>
 
-                    <div class="row g-4 mt-2">
-                      <div class="col-md-12">
-                        <%= ff.input :security_other,
-                            label: "Security Requirements",
-                            input_html: {
-                              class: "form-control form-control-lg",
-                              placeholder: "e.g., SSO, Encryption at rest, Background checks, etc."
-                            } %>
-                      </div>
-                    </div>
-                  </div>
+              <div class="row">
+                <div class="col-md-6">
+                  <%= ff.input :existing_tools_stack,
+                      label: "Existing Tools / Stack",
+                      placeholder: "e.g., HubSpot, Airtable, Notion, Zapier, Make, n8n, CrewAI",
+                      input_html: { class: "form-control" } %>
 
-                  <div class="section-footer p-4 text-center">
-                    <button type="button" class="btn btn-outline-secondary btn-lg me-3"
-                      data-action="click->analysis#showSection"
-                      data-section-number-value="4">
-                      <i class="fas fa-arrow-left me-2"></i>Back
-                    </button>
-                    <%= f.button :submit,
-                        "🚀 Run StaffCraft Analysis",
-                        class: "btn btn-danger btn-lg px-5",
-                        id: "submit-button" %>
-                  </div>
+                  <%= ff.input :existing_tools_custom,
+                      label: "Additional Tools",
+                      placeholder: "Custom tools, internal systems, etc.",
+                      input_html: { class: "form-control" } %>
+
+                  <%= ff.input :key_integrations,
+                      label: "Key Integrations Already Live",
+                      placeholder: "e.g., API connections, Webhooks, etc.",
+                      input_html: { class: "form-control" } %>
+
+                  <%= ff.input :tried_automating,
+                      as: :select,
+                      collection: [
+                        ['Yes – worked', 'yes_worked'],
+                        ['Yes – failed', 'yes_failed'],
+                        ['Considering', 'considering'],
+                        ['Not yet', 'not_yet']
+                      ],
+                      label: "Have You Tried Automating?",
+                      input_html: { class: "form-select" },
+                      include_blank: "Select option" %>
                 </div>
 
-              <% end %>
+                <div class="col-md-6">
+                  <%= ff.input :manual_tasks_friction,
+                      as: :text,
+                      label: "Manual Tasks Creating Friction",
+                      placeholder: "• List the repetitive tasks\n• That are slowing you down\n• And could be automated",
+                      input_html: { class: "form-control", rows: 6 } %>
+
+                  <%= ff.input :main_data_formats,
+                      as: :check_boxes,
+                      collection: [
+                        ['Email', 'email'],
+                        ['Docs', 'docs'],
+                        ['Spreadsheets', 'spreadsheets'],
+                        ['APIs', 'apis'],
+                        ['Images', 'images'],
+                        ['Other', 'other']
+                      ],
+                      label: "Main Data Formats Handled",
+                      item_wrapper_class: 'form-check',
+                      item_label_class: 'form-check-label' %>
+                  <%= ff.input :data_formats_other,
+                      label: "If Other, specify:",
+                      input_html: { class: "form-control" } %>
+                </div>
+              </div>
+
+              <!-- 5. Constraints & Compliance -->
+              <div class="section-divider mb-4 mt-5">
+                <h4 class="section-title">
+                  <span class="badge badge-primary me-2">5</span>
+                  Constraints & Compliance
+                </h4>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6">
+                  <%= ff.input :regulatory_flags,
+                      as: :check_boxes,
+                      collection: [
+                        ['GDPR', 'gdpr'],
+                        ['HIPAA', 'hipaa'],
+                        ['PCI-DSS', 'pci_dss'],
+                        ['SOC 2', 'soc2'],
+                        ['None', 'none'],
+                        ['Other', 'other']
+                      ],
+                      label: "Regulatory Flags",
+                      item_wrapper_class: 'form-check',
+                      item_label_class: 'form-check-label' %>
+                  <%= ff.input :regulatory_other,
+                      label: "If Other, specify:",
+                      input_html: { class: "form-control" } %>
+
+                  <%= ff.input :data_residency_needs,
+                      as: :select,
+                      collection: [
+                        ['US-only', 'us_only'],
+                        ['EU-only', 'eu_only'],
+                        ['Mixed', 'mixed'],
+                        ['No preference', 'no_preference']
+                      ],
+                      label: "Data Residency Needs",
+                      input_html: { class: "form-select" },
+                      include_blank: "Select preference" %>
+                </div>
+
+                <div class="col-md-6">
+                  <%= ff.input :security_requirements,
+                      as: :check_boxes,
+                      collection: [
+                        ['SSO', 'sso'],
+                        ['Encryption at rest', 'encryption_rest'],
+                        ['Background checks', 'background_checks'],
+                        ['None', 'none'],
+                        ['Other', 'other']
+                      ],
+                      label: "Security Requirements",
+                      item_wrapper_class: 'form-check',
+                      item_label_class: 'form-check-label' %>
+                  <%= ff.input :security_other,
+                      label: "If Other, specify:",
+                      input_html: { class: "form-control" } %>
+                </div>
+              </div>
 
             <% end %>
-          </div>
+            <!-- END NESTED FORM -->
+
+            <!-- Submit Button -->
+            <div class="text-center mt-5">
+              <%= f.button :submit,
+                  "Run StaffCraft Analysis",
+                  class: "btn btn-primary btn-lg px-5" %>
+              <p class="text-muted mt-2 small">
+                We'll decompose the role, benchmark automation and agent options, and hand you a side-by-side plan—plus one-click playbooks to launch the winning path.
+              </p>
+            </div>
+
+          <% end %>
         </div>
       </div>
     </div>
