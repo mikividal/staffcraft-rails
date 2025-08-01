@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_07_11_115211) do
+ActiveRecord::Schema[7.1].define(version: 2025_08_01_122504) do
   create_table "agent_results", force: :cascade do |t|
     t.integer "analysis_id", null: false
     t.string "agent_name", null: false
@@ -55,7 +55,6 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_11_115211) do
     t.string "industry_other"
     t.integer "annual_revenue_band"
     t.integer "company_size"
-    t.integer "technical_maturity"
     t.string "role_title", null: false
     t.integer "department_function"
     t.string "department_other"
@@ -89,11 +88,15 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_11_115211) do
     t.string "security_other"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "has_internal_it_team", default: false
+    t.string "team_skills_level"
+    t.string "team_available_hours"
+    t.text "existing_tools_data"
     t.index ["analysis_id"], name: "index_form_data_on_analysis_id"
     t.index ["annual_revenue_band"], name: "index_form_data_on_annual_revenue_band"
     t.index ["company_name"], name: "index_form_data_on_company_name"
-    t.index ["company_size", "technical_maturity"], name: "index_form_data_on_company_size_and_technical_maturity"
     t.index ["company_size"], name: "index_form_data_on_company_size"
+    t.index ["company_size"], name: "index_form_data_on_company_size_and_technical_maturity"
     t.index ["created_at"], name: "index_form_data_on_created_at"
     t.index ["deadline_to_fill"], name: "index_form_data_on_deadline_to_fill"
     t.index ["department_function", "seniority_level"], name: "index_form_data_on_department_function_and_seniority_level"
@@ -105,7 +108,6 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_11_115211) do
     t.index ["monthly_budget_ceiling"], name: "index_form_data_on_monthly_budget_ceiling"
     t.index ["role_title"], name: "index_form_data_on_role_title"
     t.index ["seniority_level"], name: "index_form_data_on_seniority_level"
-    t.index ["technical_maturity"], name: "index_form_data_on_technical_maturity"
   end
 
   add_foreign_key "agent_results", "analyses"

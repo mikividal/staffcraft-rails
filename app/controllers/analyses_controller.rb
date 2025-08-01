@@ -35,7 +35,7 @@ class AnalysesController < ApplicationController
     params.require(:analysis).require(:form_data_attributes).permit(
       # Company Snapshot
       :company_name, :company_url, :industry_business_model, :industry_other,
-      :annual_revenue_band, :company_size, :technical_maturity,
+      :annual_revenue_band, :company_size, :has_internal_it_team, :team_skills_level, :team_available_hours,
 
       # Role to Hire
       :role_title, :department_function, :department_other, :seniority_level,
@@ -48,7 +48,7 @@ class AnalysesController < ApplicationController
 
       # Tools & Process Context
       :existing_tools_stack, :existing_tools_custom, :manual_tasks_friction,
-      :tried_automating, :data_formats_other,
+      :tried_automating, :data_formats_other, :existing_tools_data,
 
       # Constraints & Compliance
       :regulatory_other, :data_residency_needs, :security_other,

@@ -107,3 +107,23 @@ POPULAR_TOOLS = [
   # AI/ML
   'OpenAI API', 'CrewAI', 'LangChain', 'Anthropic Claude', 'Hugging Face'
 ].freeze
+
+TIMEZONE_OPTIONS = [
+  ['Eastern Time (US & Canada)', 'America/New_York'],
+  ['Central Time (US & Canada)', 'America/Chicago'],
+  ['Mountain Time (US & Canada)', 'America/Denver'],
+  ['Pacific Time (US & Canada)', 'America/Los_Angeles'],
+  ['Alaska', 'America/Anchorage'],
+  ['Hawaii', 'Pacific/Honolulu'],
+  ['UTC/GMT', 'UTC'],
+  ['London', 'Europe/London'],
+  ['Paris/Berlin', 'Europe/Paris'],
+  ['Amsterdam', 'Europe/Amsterdam'],
+  ['Tokyo', 'Asia/Tokyo'],
+  ['Sydney', 'Australia/Sydney'],
+  ['Mumbai', 'Asia/Kolkata'],
+  ['Singapore', 'Asia/Singapore'],
+  ['São Paulo', 'America/Sao_Paulo'],
+  ['Buenos Aires', 'America/Argentina/Buenos_Aires'],
+  ['Mexico City', 'America/Mexico_City']
+].freeze

@@ -10,6 +10,12 @@
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
 
+    <script>
+      window.commonSkills = <%= raw COMMON_SKILLS.to_json %>;
+      window.popularTools = <%= raw POPULAR_TOOLS.to_json %>;
+      window.commonIntegrations = <%= raw COMMON_INTEGRATIONS.to_json %>;
+    </script>
+
     <!-- Open Graph / Social Media -->
     <meta property="og:title" content="StaffCraft - Should I Hire or Automate?">
     <meta property="og:description" content="AI-powered analysis to help you choose between hiring, automation, or outsourcing">

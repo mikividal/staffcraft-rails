@@ -19,6 +19,8 @@ class FormData < ApplicationRecord
   validates :company_name, presence: true
   validates :role_title, presence: true
   validates :company_url, format: { with: URI::DEFAULT_PARSER.make_regexp(%w[http https]), allow_blank: true }
+  validates :team_skills_level, presence: true, if: :has_internal_it_team?
+  validates :team_available_hours, presence: true, if: :has_internal_it_team?
 
   # ================================
   # SERIALIZATIONS
@@ -32,6 +34,7 @@ class FormData < ApplicationRecord
   # serialize :regulatory_flags, type: Array
   # serialize :security_requirements, type: Array
   # serialize :main_data_formats, type: Array
+  # serialize :existing_tools_data, Array
 
   # ================================
   # ENUMS
@@ -70,13 +73,20 @@ class FormData < ApplicationRecord
     size_100_plus: 5
   }
 
-  enum technical_maturity: {
-    non_technical: 0,
-    power_users: 1,
-    api_comfortable: 2,
-    can_code: 3
+ enum team_skills_level: {
+    team_junior: 0,
+    team_mid_level: 1,
+    team_senior: 2,
+    team_expert: 3
   }
 
+
+  enum team_available_hours: {
+    under_5: 0,
+    h5_15: 1,
+    h15_30: 2,
+    over_30: 3
+  }
   enum department_function: {
     sales: 0,
     marketing: 1,
@@ -253,9 +263,10 @@ class FormData < ApplicationRecord
 
   # def automation_readiness_score
   #   score = 0
-  #   score += 25 if technical_maturity == 'can_code'
-  #   score += 20 if technical_maturity == 'api_comfortable'
-  #   score += 10 if technical_maturity == 'power_users'
+  #   score += 30 if has_internal_it_team && team_skills_level == 'expert'
+  #   score += 25 if has_internal_it_team && team_skills_level == 'senior'
+  #   score += 15 if has_internal_it_team && team_skills_level == 'mid_level'
+  #   score += 10 if has_internal_it_team && team_skills_level == 'junior'
 
   #   score += 15 if tried_automating == 'yes_worked'
   #   score += 10 if tried_automating == 'considering'
@@ -277,7 +288,9 @@ class FormData < ApplicationRecord
         industry: industry_display,
         size: company_size_display,
         revenue: budget_display,
-        technical_maturity: technical_maturity&.humanize
+        has_internal_it_team: has_internal_it_team? ? 'Yes' : 'No',
+        team_skills_level: team_skills_level&.humanize,
+        team_available_hours: team_available_hours&.humanize
       },
 
       # Role info

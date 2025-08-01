@@ -103,8 +103,7 @@
                                   toggle_target: "industry_other_group"
                                 }
                             },
-                            include_blank: "Select your industry",
-                            selected: nil %>
+                            include_blank: "Select your industry"%>
                       </div>
                       <div class="col-md-6">
                         <div class="conditional-field-group" id="industry_other_group" style="display: none;">
@@ -152,27 +151,65 @@
 
                     <div class="row g-4 mt-2">
                       <div class="col-md-6">
-                        <%= ff.input :technical_maturity,
-                            as: :select,
-                            collection: [
-                              ['Non-technical', 'non_technical'],
-                              ['Tool power-users', 'power_users'],
-                              ['API-comfortable', 'api_comfortable'],
-                              ['Can code', 'can_code']
-                            ],
-                            label: "Technical Maturity",
-                            input_html: { class: "form-select form-select-lg" },
-                            include_blank: "How technical is your team?" %>
+                        <div class="form-check form-check-lg mb-3">
+                          <%= ff.input :has_internal_it_team,
+                              as: :boolean,
+                              label: "Internal IT/Devs team",
+                              input_html: {
+                                class: "form-check-input form-check-input-lg",
+                                data: {
+                                  controller: "analysis",
+                                  action: "change->analysis#toggleOtherField",
+                                  toggle_target: "it_team_details"
+                                }
+                              } %>
+                        </div>
+                      </div>
+                    </div>
+                        <!-- Campos condicionales -->
+                        <div class="conditional-field-group" id="it_team_details" style="display: none;">
+                          <div class="row g-4 mt-2">
+                            <div class="col-md-6">
+                              <%= ff.input :team_skills_level,
+                                  as: :select,
+                                  collection: [
+                                   ['Junior (Basic scripts, simple tools)', :junior],
+                                   ['Mid-level (API integration, custom tools)', :mid_level],
+                                   ['Senior (Full-stack, complex systems)', :senior],
+                                   ['Expert (System architecture, AI/ML)', :expert]
+                                  ],
+                                  label: "Team's Skills Level",
+                                  input_html: { class: "form-select" },
+                                  include_blank: "Select skill level" %>
+                            </div>
+
+                            <div class="col-md-6">
+                              <%= ff.input :team_available_hours,
+                                  as: :select,
+                                  collection: [
+                                    ['< 5 hours/week', :under_5],
+                                    ['5-15 hours/week', :h5_15],
+                                    ['15-30 hours/week', :h15_30],
+                                    ['30+ hours/week (dedicated)', :over_30]
+                                  ],
+                                  label: "Team's Total Available Hours",
+                                  input_html: { class: "form-select" },
+                                  include_blank: "Select availability" %>
+                            </div>
+                           </div>
+                          </div>
+                        </div>
+                        <div class="section-footer p-4 text-center">
+                          <button type="button" data-action="click->analysis#showSection" data-section-number-value="2">
+                            Continue to Role Details <i class="fas fa-arrow-right ms-2"></i>
+                          </button>
+                        </div>
                       </div>
                   </div>
                 </div>
-                  <div class="section-footer p-4 text-center">
-                    <button type="button" data-action="click->analysis#showSection" data-section-number-value="2">
-                      Continue to Role Details <i class="fas fa-arrow-right ms-2"></i>
-                    </button>
-                  </div>
                 </div>
 
+                <!-- Section 2: Role to Hire -->
                 <!-- Section 2: Role to Hire -->
                 <div class="form-section d-none" id="section-2">
                   <div class="section-header bg-success text-white p-4">
@@ -181,6 +218,7 @@
                   </div>
 
                   <div class="section-content bg-light p-5">
+                    <!-- Primera fila: Título y Deadline -->
                     <div class="row g-4">
                       <div class="col-md-6">
                         <%= ff.input :role_title,
@@ -193,19 +231,127 @@
                             required: true %>
                       </div>
                       <div class="col-md-6">
+                        <%= ff.input :deadline_to_fill,
+                            as: :select,
+                            collection: [
+                              ['ASAP', :asap],
+                              ['< 1 month', :under_1_month],
+                              ['< 3 months', :under_3_months],
+                              ['< 6 months', :under_6_months],
+                              ['Just exploring', :exploring]
+                            ],
+                            label: "Deadline to Fill Role",
+                            input_html: { class: "form-select form-select-lg" },
+                            include_blank: "Select timeline" %>
+                      </div>
+                    </div>
+
+                    <!-- Segunda fila: Seniority, Employment Type, Budget -->
+                    <div class="row g-4 mt-2">
+                      <div class="col-md-4">
+                        <%= ff.input :seniority_level,
+                            as: :select,
+                            collection: [
+                              ['Junior (0-2 years)', :junior],
+                              ['Mid-level (2-5 years)', :mid],
+                              ['Senior (5+ years)', :senior],
+                              ['Expert (10+ years)', :expert]
+                            ],
+                            label: "Seniority Level",
+                            input_html: { class: "form-select form-select-lg" },
+                            include_blank: "Select experience level" %>
+                      </div>
+                      <div class="col-md-4">
+                        <%= ff.input :employment_type,
+                            as: :select,
+                            collection: [
+                              ['Full-time employee', :full_time],
+                              ['Part-time employee', :part_time],
+                              ['Contractor / Freelancer', :contractor],
+                              ['Fractional executive', :fractional]
+                            ],
+                            label: "Employment Type",
+                            input_html: { class: "form-select form-select-lg" },
+                            include_blank: "Select employment type" %>
+                      </div>
+                      <div class="col-md-4">
+                        <%= ff.input :monthly_budget_ceiling,
+                            as: :select,
+                            collection: [
+                              ['Up to $800', :up_to_800],
+                              ['$800 - $2,000', :under_2k],
+                              ['$2,000 - $5,000', :k2_5k],
+                              ['$5,000 - $10,000', :k5_10k],
+                              ['$10,000 - $20,000', :k10_20k],
+                              ['$20,000+', :over_20k]
+                            ],
+                            label: "Monthly Budget",
+                            input_html: { class: "form-select form-select-lg" },
+                            include_blank: "Select budget range" %>
+                      </div>
+                    </div>
+
+                    <!-- Tercera fila: Location Type y On-site Location -->
+                    <div class="row g-4 mt-2">
+                      <div class="col-md-6">
+                        <%= ff.input :location_type,
+                            as: :select,
+                            collection: [
+                              ['Remote (anywhere)', :remote_anywhere],
+                              ['Remote (specific timezone)', :remote_timezone],
+                              ['Hybrid', :hybrid],
+                              ['On-site', :onsite]
+                            ],
+                            label: "Location Type",
+                            input_html: {
+                              class: "form-select form-select-lg",
+                              data: {
+                                action: "change->analysis#toggleOtherField",
+                                toggle_target: "timezone_details_group"
+                              }
+                            },
+                            include_blank: "Select location type" %>
+                      </div>
+                      <div class="col-md-6">
+                        <%= ff.input :onsite_location,
+                            label: "On-site Location (if aplicable)",
+                            input_html: {
+                              class: "form-control form-control-lg",
+                              placeholder: "e.g., New York, NY"
+                            } %>
+                      </div>
+                    </div>
+
+                    <!-- Campo condicional: Working Hours (solo para remote timezone) -->
+                    <div class="conditional-field-group" id="timezone_details_group" style="display: none;">
+                      <div class="row g-4 mt-2">
+                        <div class="col-md-6">
+                          <%= ff.input :working_hours_timezone,
+                              as: :select,
+                              collection: TIMEZONE_OPTIONS,
+                              label: "Required Working Hours/Timezone",
+                              input_html: { class: "form-select form-control-lg" },
+                              include_blank: "Select timezone" %>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Cuarta fila: Department -->
+                    <div class="row g-4 mt-2">
+                      <div class="col-md-6">
                         <%= ff.input :department_function,
                             as: :select,
                             collection: [
-                              ['Sales', 'sales'],
-                              ['Marketing', 'marketing'],
-                              ['Product', 'product'],
-                              ['Engineering', 'engineering'],
-                              ['Operations', 'ops'],
-                              ['Finance', 'finance'],
-                              ['Customer Success', 'customer_success'],
-                              ['HR / People', 'hr_people'],
-                              ['Legal / Compliance', 'legal_compliance'],
-                              ['Other', 'department_other']
+                              ['Sales', :sales],
+                              ['Marketing', :marketing],
+                              ['Product', :product],
+                              ['Engineering', :engineering],
+                              ['Operations', :ops],
+                              ['Finance', :finance],
+                              ['Customer Success', :customer_success],
+                              ['HR / People', :hr_people],
+                              ['Legal / Compliance', :legal_compliance],
+                              ['Other', :department_other]
                             ],
                             label: "Department",
                             input_html: {
@@ -217,76 +363,101 @@
                             },
                             include_blank: "Select department" %>
                       </div>
-                    </div>
-
-                    <div class="row g-4 mt-2">
-                      <div class="col-md-4">
-                        <%= ff.input :seniority_level,
-                            as: :select,
-                            collection: [
-                              ['Junior (0-2 years)', 'junior'],
-                              ['Mid-level (2-5 years)', 'mid'],
-                              ['Senior (5+ years)', 'senior'],
-                              ['Expert (10+ years)', 'expert']
-                            ],
-                            label: "Seniority Level",
-                            input_html: { class: "form-select form-select-lg" },
-                            include_blank: "Select experience level" %>
-                      </div>
-                      <div class="col-md-4">
-                        <%= ff.input :employment_type,
-                            as: :select,
-                            collection: [
-                              ['Full-time employee', 'full_time'],
-                              ['Part-time employee', 'part_time'],
-                              ['Contractor / Freelancer', 'contractor'],
-                              ['Fractional executive', 'fractional']
-                            ],
-                            label: "Employment Type",
-                            input_html: { class: "form-select form-select-lg" },
-                            include_blank: "Select employment type" %>
-                      </div>
-                      <div class="col-md-4">
-                        <%= ff.input :monthly_budget_ceiling,
-                            as: :select,
-                            collection: [
-                              ['Up to $800', 'up_to_800'],
-                              ['$800 - $2,000', 'under_2k'],
-                              ['$2,000 - $5,000', 'k2_5k'],
-                              ['$5,000 - $10,000', 'k5_10k'],
-                              ['$10,000 - $20,000', 'k10_20k'],
-                              ['$20,000+', 'over_20k']
-                            ],
-                            label: "Monthly Budget",
-                            input_html: { class: "form-select form-select-lg" },
-                            include_blank: "Select budget range" %>
-                      </div>
-                    </div>
-
-                    <div class="row g-4 mt-2">
-                      <div class="col-md-6">
-                        <%= ff.input :deadline_to_fill,
-                            as: :select,
-                            collection: [
-                              ['ASAP', 'asap'],
-                              ['< 1 month', 'under_1_month'],
-                              ['< 3 months', 'under_3_months'],
-                              ['< 6 months', 'under_6_months'],
-                              ['Just exploring', 'exploring']
-                            ],
-                            label: "Deadline to Fill Role",
-                            input_html: { class: "form-select form-select-lg" },
-                            include_blank: "Select timeline" %>
-                      </div>
+                      <!-- Campos condicionales: Department Other -->
                       <div class="col-md-6">
                         <div class="conditional-field-group" id="department_other_group" style="display: none;">
-                          <%= ff.input :department_other,
-                              label: "If Other Department, specify:",
+                            <%= ff.input :department_other,
+                                label: "If Other Department, specify:",
+                                input_html: {
+                                  class: "form-control form-control-lg",
+                                  placeholder: "Specify department"
+                                } %>
+                          </div>
+                      </div>
+                    </div>
+
+                    <!-- Cuarta fila: Must-Have Skills (Tag List) -->
+                    <div class="row g-4 mt-2">
+                      <div class="col-md-12">
+                        <label class="form-label">Must-Have Skills</label>
+                        <div class="skills-input-container">
+                          <div class="skills-tags mb-2" id="skills-tags"></div>
+                          <div class="input-group position-relative">
+                            <input type="text"
+                                  class="form-control form-control-lg"
+                                  id="skills-input"
+                                  placeholder="Type or select a skill (e.g., JavaScript, Project Management)"
+                                  data-action="keydown->analysis#addSkill input->analysis#filterSkills focus->analysis#showSuggestions"
+                                  autocomplete="off">
+                            <button class="btn btn-outline-secondary" type="button" data-action="click->analysis#addSkillFromInput">
+                              <i class="fas fa-plus"></i> Add
+                            </button>
+
+                            <!-- Dropdown de sugerencias -->
+                            <div class="skills-suggestions position-absolute w-100 bg-white border rounded shadow-sm"
+                                id="skills-suggestions"
+                                style="display: none; top: 100%; z-index: 1000; max-height: 200px; overflow-y: auto;">
+                            </div>
+                          </div>
+                          <small class="text-muted">Press Enter, click Add, or select from suggestions. Click on tags to remove them.</small>
+
+                          <!-- Hidden field para enviar los skills -->
+                          <%= ff.input :must_have_skills,
+                              as: :hidden,
+                              input_html: { id: "must_have_skills_hidden" } %>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Quinta fila: Compensation -->
+                    <div class="row g-4 mt-2">
+                      <div class="col-md-6">
+                        <label class="form-label">Preferred Compensation Model</label>
+                        <div class="compensation-checkboxes">
+                          <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox"  name="analysis[form_data_attributes][preferred_compensation_model][]" value="salary" id="comp_salary">
+                            <label class="form-check-label" for="comp_salary">Fixed Salary</label>
+                          </div>
+                          <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox"  name="analysis[form_data_attributes][preferred_compensation_model][]" value="hourly" id="comp_hourly">
+                            <label class="form-check-label" for="comp_hourly">Hourly Rate</label>
+                          </div>
+                          <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox"  name="analysis[form_data_attributes][preferred_compensation_model][]" value="project" id="comp_project">
+                            <label class="form-check-label" for="comp_project">Project-based</label>
+                          </div>
+                          <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox"  name="analysis[form_data_attributes][preferred_compensation_model][]" value="equity" id="comp_equity">
+                            <label class="form-check-label" for="comp_equity">Equity/Stock Options</label>
+                          </div>
+                          <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox"  name="analysis[form_data_attributes][preferred_compensation_model][]" value="commission" id="comp_commission">
+                            <label class="form-check-label" for="comp_commission">Commission/Bonus</label>
+                          </div>
+                          <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox"  name="analysis[form_data_attributes][preferred_compensation_model][]" value="other" id="comp_other" data-action="change->analysis#toggleOtherField" data-toggle-target="compensation_other_group">
+                            <label class="form-check-label" for="comp_other">Other</label>
+                          </div>
+                        </div>
+
+                        <!-- Campo condicional para compensation other -->
+                        <div class="conditional-field-group mt-3" id="compensation_other_group" style="display: none;">
+                          <%= ff.input :compensation_other,
+                              label: "If Other, specify:",
                               input_html: {
-                                class: "form-control form-control-lg",
-                                placeholder: "Specify department"
+                                class: "form-control",
+                                placeholder: "Specify compensation model"
                               } %>
                         </div>
+                      </div>
+
+                      <div class="col-md-6">
+                        <%= ff.input :contract_length,
+                            label: "Contract Length (if applicable)",
+                            input_html: {
+                              class: "form-control form-control-lg",
+                              placeholder: "e.g., 6 months, 1 year, Ongoing"
+                            } %>
                       </div>
                     </div>
                   </div>
@@ -378,33 +549,36 @@
 
                   <div class="section-content bg-light p-5">
                     <div class="row g-4">
-                      <div class="col-md-6">
-                        <%= ff.input :existing_tools_stack,
-                            label: "Existing Tools / Stack",
-                            input_html: {
-                              class: "form-control form-control-lg",
-                              placeholder: "e.g., HubSpot, Airtable, Notion, Zapier"
-                            } %>
+                      <div class="col-md-12">
+                        <label class="form-label">Existing Tools/Stack</label>
+                        <div id="tools-container" class="mb-3">
+                          <!-- Tools cards aparecen aquí dinámicamente -->
+                        </div>
+
+                        <div class="input-group position-relative">
+                          <input type="text"
+                                class="form-control form-control-lg"
+                                id="tools-input"
+                                placeholder="Type or select a tool (e.g., HubSpot, Slack)"
+                                data-action="keydown->analysis#addToolKeydown input->analysis#filterTools focus->analysis#showToolSuggestions"
+                                autocomplete="off">
+                          <button class="btn btn-outline-secondary" type="button" data-action="click->analysis#addToolFromInput">
+                            <i class="fas fa-plus"></i> Add Tool
+                          </button>
+
+                          <!-- Dropdown de sugerencias para tools -->
+                          <div class="tools-suggestions position-absolute w-100 bg-white border rounded shadow-sm"
+                              id="tools-suggestions"
+                              style="display: none; top: 100%; z-index: 1000; max-height: 200px; overflow-y: auto;">
+                          </div>
+                        </div>
+
+                        <small class="text-muted">Add tools you currently use. Each tool will have fields for subscription details and integrations.</small>
+
+                        <%= ff.input :existing_tools_data, as: :hidden, input_html: { id: "tools_data_hidden" } %>
                       </div>
-                      <div class="col-md-6">
-                        <%= ff.input :existing_tools_custom,
-                            label: "Additional Tools",
-                            input_html: {
-                              class: "form-control form-control-lg",
-                              placeholder: "Custom tools, internal systems, etc."
-                            } %>
-                      </div>
-                    </div>
 
                     <div class="row g-4 mt-2">
-                      <div class="col-md-6">
-                        <%= ff.input :key_integrations,
-                            label: "Key Integrations Already Live",
-                            input_html: {
-                              class: "form-control form-control-lg",
-                              placeholder: "e.g., API connections, Webhooks, etc."
-                            } %>
-                      </div>
                       <div class="col-md-6">
                         <%= ff.input :tried_automating,
                             as: :select,

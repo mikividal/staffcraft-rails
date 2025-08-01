@@ -3,13 +3,36 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller {
   connect() {
     console.log(" Stimulus: connect() started")
+
+    this.availableSkills = window.commonSkills || []
+    this.availableTools = window.popularTools || []
+    this.availableIntegrations = window.commonIntegrations || []
+    this.toolsData = []  // Array para guardar datos de tools
+    console.log("Loaded skills:", this.availableSkills.length)
+
     this.currentStep = 1
     this.totalSteps = 5
 
     this.initializeValidation()
     this.initializeConditionalFields()
     this.initializeAutoSave()
-    this.loadSavedData()
+
+    // Limpia cualquier sesión anterior pero mantiene autoguardado para esta sesión
+    localStorage.removeItem('staffcraft_draft')
+
+    // Reset visual del formulario
+    const industrySelect = document.querySelector('select[name*="industry_business_model"]')
+    if (industrySelect) {
+      industrySelect.selectedIndex = 0  // Selecciona el primer option (placeholder)
+
+      // También oculta cualquier campo "other" que esté visible
+      const otherGroup = document.getElementById('industry_other_group')
+      if (otherGroup) {
+        otherGroup.style.display = 'none'
+        otherGroup.classList.remove('show')
+      }
+    }
+
     this.bindStepClicks()
     this.bindKeyboardNavigation()
     this.bindFormSubmit()
@@ -57,28 +80,92 @@ export default class extends Controller {
   }
 
   toggleOtherField(event) {
-
-    const selectElement = event.target
-    const targetId = selectElement.dataset.toggleTarget
+    const inputElement = event.target
+    const targetId = inputElement.dataset.toggleTarget
     const targetGroup = document.getElementById(targetId)
-
 
     if (!targetGroup) return
 
-    const inputField = targetGroup.querySelector('input')
-
-    if (selectElement.value.includes('other')) {
-      targetGroup.style.display = 'block'
-      targetGroup.classList.add('show')
-      if (inputField) setTimeout(() => inputField.focus(), 300)
-    } else {
-      targetGroup.classList.remove('show')
-      setTimeout(() => {
-        targetGroup.style.display = 'none'
-        if (inputField) inputField.value = ''
-      }, 300)
+    // Para checkboxes
+    if (inputElement.type === 'checkbox') {
+      if (inputElement.checked) {
+        targetGroup.style.display = 'block'
+        targetGroup.classList.add('show')
+      } else {
+        targetGroup.classList.remove('show')
+        setTimeout(() => {
+          targetGroup.style.display = 'none'
+          targetGroup.querySelectorAll('select').forEach(select => select.selectedIndex = 0)
+          targetGroup.querySelectorAll('input').forEach(input => input.value = '')
+        }, 300)
+      }
+    }
+    // Para location_type - mostrar SOLO si es "remote_timezone"
+    else if (inputElement.name && inputElement.name.includes('location_type')) {
+      if (inputElement.value === 'remote_timezone') {
+        targetGroup.style.display = 'block'
+        targetGroup.classList.add('show')
+      } else {
+        targetGroup.classList.remove('show')
+        setTimeout(() => {
+          targetGroup.style.display = 'none'
+          targetGroup.querySelectorAll('input').forEach(input => input.value = '')
+        }, 300)
+      }
+    }
+    // Para selects con "other"
+    else {
+      if (inputElement.value.includes('other')) {
+        targetGroup.style.display = 'block'
+        targetGroup.classList.add('show')
+      } else {
+        targetGroup.classList.remove('show')
+        setTimeout(() => {
+          targetGroup.style.display = 'none'
+          targetGroup.querySelectorAll('input').forEach(input => input.value = '')
+        }, 300)
+      }
     }
   }
+
+  // Para el tag list de skills
+
+  addSkillFromInput() {
+    const input = document.getElementById('skills-input')
+    const skill = input.value.trim()
+
+    if (skill) {
+      this.createSkillTag(skill)
+      input.value = ''
+      this.updateHiddenSkillsField()
+    }
+  }
+
+  createSkillTag(skill) {
+    const tagsContainer = document.getElementById('skills-tags')
+    const tag = document.createElement('span')
+    tag.className = 'badge bg-primary me-2 mb-2 fs-6 skill-tag'
+    tag.style.cursor = 'pointer'
+    tag.innerHTML = `${skill} <i class="fas fa-times ms-1"></i>`
+
+    tag.addEventListener('click', () => {
+      tag.remove()
+      this.updateHiddenSkillsField()
+    })
+
+    tagsContainer.appendChild(tag)
+  }
+
+  updateHiddenSkillsField() {
+    const tags = document.querySelectorAll('.skill-tag')
+    const hiddenField = document.getElementById('must_have_skills_hidden')
+
+    if (!hiddenField) return  // ← Añade esta verificación
+
+    const skills = Array.from(tags).map(tag => tag.textContent.replace(' ×', '').trim())
+    hiddenField.value = skills.join(', ')
+  }
+
 
   validateSection(sectionNumber) {
     const section = document.getElementById(`section-${sectionNumber}`)
@@ -314,5 +401,265 @@ export default class extends Controller {
       }
     `
     document.head.appendChild(style)
+  }
+
+  // Filtrar y mostrar sugerencias
+  filterSkills(event) {
+    const input = event.target
+    const query = input.value.toLowerCase().trim()
+    const suggestionsDiv = document.getElementById('skills-suggestions')
+
+    if (!suggestionsDiv) return  // ← Añade esta verificación
+
+    if (query.length < 2) {
+      suggestionsDiv.style.display = 'none'
+      return
+    }
+
+    const filteredSkills = this.availableSkills.filter(skill =>
+      skill.toLowerCase().includes(query) &&
+      !this.isSkillAlreadyAdded(skill)
+    ).slice(0, 8)
+
+    this.displaySuggestions(filteredSkills)
+  }
+
+// Mostrar dropdown de sugerencias
+  showSuggestions() {
+    const suggestionsDiv = document.getElementById('skills-suggestions')
+    if (!suggestionsDiv) return  // ← Añade esta verificación
+
+    if (this.availableSkills.length > 0) {
+      const topSkills = this.availableSkills.filter(skill =>
+        !this.isSkillAlreadyAdded(skill)
+      ).slice(0, 8)
+      this.displaySuggestions(topSkills)
+    }
+  }
+
+  // Renderizar las sugerencias
+  displaySuggestions(skills) {
+    const suggestionsDiv = document.getElementById('skills-suggestions')
+    if (!suggestionsDiv) return  // ← Añade esta verificación
+
+    if (skills.length === 0) {
+      suggestionsDiv.style.display = 'none'
+      return
+    }
+
+    suggestionsDiv.innerHTML = skills.map(skill =>
+      `<div class="suggestion-item p-2 border-bottom" style="cursor: pointer;" data-skill="${skill}">
+        ${skill}
+      </div>`
+    ).join('')
+
+    // Añadir event listeners
+    suggestionsDiv.querySelectorAll('.suggestion-item').forEach(item => {
+      item.addEventListener('click', () => {
+        this.addSkillFromSuggestion(item.dataset.skill)
+      })
+    })
+
+    suggestionsDiv.style.display = 'block'
+  }
+
+  // Añadir skill desde sugerencia
+  addSkillFromSuggestion(skill) {
+    this.createSkillTag(skill)
+    document.getElementById('skills-input').value = ''
+    document.getElementById('skills-suggestions').style.display = 'none'
+    this.updateHiddenSkillsField()
+  }
+
+  // Verificar si skill ya está añadida
+  isSkillAlreadyAdded(skill) {
+    const existingTags = document.querySelectorAll('.skill-tag')
+    return Array.from(existingTags).some(tag =>
+      tag.textContent.replace(' ×', '').trim().toLowerCase() === skill.toLowerCase()
+    )
+  }
+
+  // Actualizar el método addSkill para ocultar sugerencias
+   addSkill(event) {
+    // Solo manejar Enter y Escape, no otras teclas
+    if (event.key === 'Enter') {
+      event.preventDefault()
+      this.addSkillFromInput()
+
+      // Verificar que el elemento existe antes de acceder a .style
+      const suggestionsDiv = document.getElementById('skills-suggestions')
+      if (suggestionsDiv) {
+        suggestionsDiv.style.display = 'none'
+      }
+    } else if (event.key === 'Escape') {
+      const suggestionsDiv = document.getElementById('skills-suggestions')
+      if (suggestionsDiv) {
+        suggestionsDiv.style.display = 'none'
+      }
+    }
+  }
+
+
+  // Métodos para Tools (similares a skills pero con cards)
+  addToolKeydown(event) {
+    if (event.key === 'Enter') {
+      event.preventDefault()
+      this.addToolFromInput()
+    } else if (event.key === 'Escape') {
+      const suggestionsDiv = document.getElementById('tools-suggestions')
+      if (suggestionsDiv) suggestionsDiv.style.display = 'none'
+    }
+  }
+
+  addToolFromInput() {
+    const input = document.getElementById('tools-input')
+    if (!input) return
+
+    const tool = input.value.trim()
+    if (tool && !this.isToolAlreadyAdded(tool)) {
+      this.createToolCard(tool)
+      input.value = ''
+      const suggestionsDiv = document.getElementById('tools-suggestions')
+      if (suggestionsDiv) suggestionsDiv.style.display = 'none'
+      this.updateToolsData()
+    }
+  }
+
+  createToolCard(toolName) {
+    const container = document.getElementById('tools-container')
+    if (!container) return
+
+    const toolId = `tool-${Date.now()}` // ID único
+
+    const card = document.createElement('div')
+    card.className = 'tool-card border rounded p-3 mb-3'
+    card.id = toolId
+    card.innerHTML = `
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h6 class="mb-0">🛠️ ${toolName}</h6>
+        <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('.tool-card').remove(); window.analysisController.updateToolsData()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div class="row g-2">
+        <div class="col-md-6">
+          <input type="text"
+                class="form-control subscription-input"
+                placeholder="Subscription type (e.g., Pro Plan, Free)"
+                data-tool="${toolName}">
+        </div>
+        <div class="col-md-6">
+          <div class="position-relative">
+            <input type="text"
+                  class="form-control integrations-input"
+                  placeholder="Live integrations"
+                  data-tool="${toolName}"
+                  data-action="input->analysis#filterIntegrations focus->analysis#showIntegrationSuggestions">
+            <div class="integrations-suggestions position-absolute w-100 bg-white border rounded shadow-sm"
+                style="display: none; top: 100%; z-index: 1001; max-height: 150px; overflow-y: auto;">
+            </div>
+          </div>
+        </div>
+      </div>
+    `
+
+    container.appendChild(card)
+
+    // Hacer disponible globally para el onclick
+    window.analysisController = this
+  }
+
+  filterTools(event) {
+    const input = event.target
+    const query = input.value.toLowerCase().trim()
+    const suggestionsDiv = document.getElementById('tools-suggestions')
+
+    if (!suggestionsDiv) return
+
+    if (query.length < 2) {
+      suggestionsDiv.style.display = 'none'
+      return
+    }
+
+    const filteredTools = this.availableTools.filter(tool =>
+      tool.toLowerCase().includes(query) &&
+      !this.isToolAlreadyAdded(tool)
+    ).slice(0, 8)
+
+    this.displayToolSuggestions(filteredTools)
+  }
+
+  showToolSuggestions() {
+    const suggestionsDiv = document.getElementById('tools-suggestions')
+    if (!suggestionsDiv) return
+
+    if (this.availableTools.length > 0) {
+      const topTools = this.availableTools.filter(tool =>
+        !this.isToolAlreadyAdded(tool)
+      ).slice(0, 8)
+      this.displayToolSuggestions(topTools)
+    }
+  }
+
+  displayToolSuggestions(tools) {
+    const suggestionsDiv = document.getElementById('tools-suggestions')
+    if (!suggestionsDiv) return
+
+    if (tools.length === 0) {
+      suggestionsDiv.style.display = 'none'
+      return
+    }
+
+    suggestionsDiv.innerHTML = tools.map(tool =>
+      `<div class="suggestion-item p-2 border-bottom" style="cursor: pointer;" data-tool="${tool}">
+        ${tool}
+      </div>`
+    ).join('')
+
+    suggestionsDiv.querySelectorAll('.suggestion-item').forEach(item => {
+      item.addEventListener('click', () => {
+        this.addToolFromSuggestion(item.dataset.tool)
+      })
+    })
+
+    suggestionsDiv.style.display = 'block'
+  }
+
+  addToolFromSuggestion(tool) {
+    this.createToolCard(tool)
+    document.getElementById('tools-input').value = ''
+    document.getElementById('tools-suggestions').style.display = 'none'
+    this.updateToolsData()
+  }
+
+  isToolAlreadyAdded(tool) {
+    const existingCards = document.querySelectorAll('.tool-card h6')
+    return Array.from(existingCards).some(card =>
+      card.textContent.replace('🛠️ ', '').trim().toLowerCase() === tool.toLowerCase()
+    )
+  }
+
+  updateToolsData() {
+    const cards = document.querySelectorAll('.tool-card')
+    const toolsData = []
+
+    cards.forEach(card => {
+      const toolName = card.querySelector('h6').textContent.replace('🛠️ ', '').trim()
+      const subscription = card.querySelector('.subscription-input').value
+      const integrations = card.querySelector('.integrations-input').value
+
+      toolsData.push({
+        tool: toolName,
+        subscription: subscription,
+        integrations: integrations
+      })
+    })
+
+    this.toolsData = toolsData
+    const hiddenField = document.getElementById('tools_data_hidden')
+    if (hiddenField) {
+      hiddenField.value = JSON.stringify(toolsData)
+    }
   }
 }
