@@ -1,14 +1,5 @@
-import { application } from "./application"
+import { application } from "controllers/application"
 
-import { Controller } from "@hotwired/stimulus"
-
-const controllers = import.meta.glob("./*_controller.js", { eager: true })
-
-Object.entries(controllers).forEach(([path, module]) => {
-  const controllerName = path
-    .replace("./", "")
-    .replace("_controller.js", "")
-    .replace(/_/g, "-")
-
-  application.register(controllerName, module.default)
-})
+// Eager load all controllers defined in the import map under controllers/**/*_controller
+import { eagerLoadControllersFrom } from "@hotwired/stimulus-loading"
+eagerLoadControllersFrom("controllers", application)

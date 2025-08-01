@@ -1,15 +1,10 @@
-<div data-controller="analysis">
-<p> hola </p>
-</div>
-
-<div data-controller="test">Prueba de Controlador</div>
-
 <% content_for :head do %>
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="<%= request.original_url %>">
 <% end %>
 
 
+<div data-controller="analysis">
   <div class="container-fluid py-5">
     <div class="row justify-content-center">
       <div class="col-12 col-xl-10">
@@ -81,7 +76,7 @@
                     </div>
 
                     <div class="row g-4 mt-2">
-                      <div class="col-md-4">
+                      <div class="col-md-6">
                         <%= ff.input :industry_business_model,
                             as: :select,
                             collection: [
@@ -103,11 +98,23 @@
                             input_html: {
                               class: "form-select form-select-lg",
                                 data: {
+                                  controller: "analysis",
                                   action: "change->analysis#toggleOtherField",
                                   toggle_target: "industry_other_group"
                                 }
                             },
-                            include_blank: "Select your industry" %>
+                            include_blank: "Select your industry",
+                            selected: nil %>
+                      </div>
+                      <div class="col-md-6">
+                        <div class="conditional-field-group" id="industry_other_group" style="display: none;">
+                          <%= ff.input :industry_other,
+                              label: "If Other Industry, specify:",
+                              input_html: {
+                                class: "form-control form-control-lg",
+                                placeholder: "Specify your industry"
+                              } %>
+                        </div>
                       </div>
 
                       <div class="col-md-4">
@@ -157,16 +164,6 @@
                             input_html: { class: "form-select form-select-lg" },
                             include_blank: "How technical is your team?" %>
                       </div>
-                    <div class="col-md-6">
-                      <div class="conditional-field-group" id="industry_other_group" style="display: none;">
-                        <%= ff.input :industry_other,
-                            label: "If Other Industry, specify:",
-                            input_html: {
-                              class: "form-control form-control-lg",
-                              placeholder: "Specify your industry"
-                            } %>
-                      </div>
-                    </div>
                   </div>
                 </div>
                   <div class="section-footer p-4 text-center">
